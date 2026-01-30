@@ -39,7 +39,10 @@ export const products: Product[] = [
     categoryId: 'frozen',
     price: 45,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1506806732259-39c2d0268443?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'FRZ-MIX-001',
     weightOptions: [
       { label_ar: '400 جرام', label_en: '400g', grams: 400, priceDelta: 0 },
@@ -61,7 +64,10 @@ export const products: Product[] = [
     categoryId: 'frozen',
     price: 35,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1506354666786-959d6d497f1a?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'FRZ-PC-002',
     weightOptions: [
       { label_ar: '400 جرام', label_en: '400g', grams: 400, priceDelta: 0 },
@@ -82,7 +88,10 @@ export const products: Product[] = [
     categoryId: 'frozen',
     price: 55,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1460306855393-0410f61241c7?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'FRZ-FF-003',
     weightOptions: [
       { label_ar: '500 جرام', label_en: '500g', grams: 500, priceDelta: 0 },
@@ -104,7 +113,10 @@ export const products: Product[] = [
     categoryId: 'frozen',
     price: 30,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1524594227084-bf3f6f7b8b15?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'FRZ-SPN-004',
     weightOptions: [
       { label_ar: '400 جرام', label_en: '400g', grams: 400, priceDelta: 0 },
@@ -125,7 +137,10 @@ export const products: Product[] = [
     categoryId: 'frozen',
     price: 65,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1506806732259-39c2d0268443?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'FRZ-OKR-005',
     weightOptions: [
       { label_ar: '400 جرام', label_en: '400g', grams: 400, priceDelta: 0 },
@@ -146,7 +161,10 @@ export const products: Product[] = [
     categoryId: 'frozen',
     price: 40,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'FRZ-MLK-006',
     weightOptions: [
       { label_ar: '400 جرام', label_en: '400g', grams: 400, priceDelta: 0 },
@@ -169,7 +187,10 @@ export const products: Product[] = [
     categoryId: 'meat',
     price: 180,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'MT-BCB-001',
     weightOptions: [
       { label_ar: '400 جرام', label_en: '400g', grams: 400, priceDelta: 0 },
@@ -191,7 +212,10 @@ export const products: Product[] = [
     categoryId: 'meat',
     price: 120,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1604908554027-3c4a1c0f532a?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1604908811840-0d3125f8d0f7?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'MT-CHB-002',
     weightOptions: [
       { label_ar: '500 جرام', label_en: '500g', grams: 500, priceDelta: 0 },
@@ -213,7 +237,10 @@ export const products: Product[] = [
     categoryId: 'meat',
     price: 160,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1603048297172-c39f7e54d5b5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'MT-MBF-003',
     weightOptions: [
       { label_ar: '500 جرام', label_en: '500g', grams: 500, priceDelta: 0 },
@@ -234,7 +261,10 @@ export const products: Product[] = [
     categoryId: 'meat',
     price: 280,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'MT-LMC-004',
     weightOptions: [
       { label_ar: '500 جرام', label_en: '500g', grams: 500, priceDelta: 0 },
@@ -255,7 +285,10 @@ export const products: Product[] = [
     categoryId: 'meat',
     price: 95,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1585325701956-60dd9c8553bc?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'MT-WCH-005',
     weightOptions: [
       { label_ar: '1 كيلو', label_en: '1kg', grams: 1000, priceDelta: 0 },
@@ -276,7 +309,10 @@ export const products: Product[] = [
     categoryId: 'meat',
     price: 140,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'MT-KFT-006',
     weightOptions: [
       { label_ar: '500 جرام', label_en: '500g', grams: 500, priceDelta: 0 },
@@ -299,7 +335,10 @@ export const products: Product[] = [
     categoryId: 'grocery',
     price: 45,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1586201375761-83865001e31b?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'GRC-RIC-001',
     weightOptions: [
       { label_ar: '1 كيلو', label_en: '1kg', grams: 1000, priceDelta: 0 },
@@ -321,7 +360,10 @@ export const products: Product[] = [
     categoryId: 'grocery',
     price: 25,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1528712306091-ed0763094c98?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1481931098730-318b6f776db0?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'GRC-PAS-002',
     weightOptions: [
       { label_ar: '500 جرام', label_en: '500g', grams: 500, priceDelta: 0 },
@@ -342,7 +384,10 @@ export const products: Product[] = [
     categoryId: 'grocery',
     price: 180,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1507371341162-763b5e419408?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'GRC-OIL-003',
     weightOptions: [
       { label_ar: '500 مل', label_en: '500ml', grams: 500, priceDelta: 0 },
@@ -363,7 +408,10 @@ export const products: Product[] = [
     categoryId: 'grocery',
     price: 35,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'GRC-SUG-004',
     weightOptions: [
       { label_ar: '1 كيلو', label_en: '1kg', grams: 1000, priceDelta: 0 },
@@ -385,7 +433,10 @@ export const products: Product[] = [
     categoryId: 'grocery',
     price: 55,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'GRC-LNT-005',
     weightOptions: [
       { label_ar: '500 جرام', label_en: '500g', grams: 500, priceDelta: 0 },
@@ -406,7 +457,10 @@ export const products: Product[] = [
     categoryId: 'grocery',
     price: 40,
     currency: 'EGP',
-    images: ['/placeholder.svg'],
+    images: [
+      'https://images.unsplash.com/photo-1506368249639-73a05d6f6488?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
+    ],
     sku: 'GRC-FLR-006',
     weightOptions: [
       { label_ar: '1 كيلو', label_en: '1kg', grams: 1000, priceDelta: 0 },
