@@ -23,7 +23,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import patternLight from '@/assets/pattern-light.png';
 import patternDark from '@/assets/pattern-dark.png';
 
-import { slide1, slide2, slide3, slide6, slide7 } from '@/assets/slides';
+import { slide1, slide2, slide3,  slide4, slide5, slide6, slide7 } from '@/assets/slides';
 
 
 export default function HomePage() {
@@ -146,10 +146,8 @@ export default function HomePage() {
         />
 
         {/* side decorative images */}
-        <img src={slide6} alt="" className="hero-side-image hero-side-left" aria-hidden="true" />
-        <img src={slide7} alt="" className="hero-side-image hero-side-right" aria-hidden="true" />
-
-        <div className="container relative py-20 md:py-32 lg:py-36">
+        <img src={slide5} alt="" className="hero-side-image hero-side-left" aria-hidden="true" />
+         <div className="container relative py-20 md:py-32 lg:py-36">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] items-center">
             {/* Text */}
             <div className="max-w-2xl space-y-6">
