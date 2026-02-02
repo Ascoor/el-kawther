@@ -9,6 +9,7 @@ import { StoreProvider } from "@/contexts/StoreContext";
 
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
+import ProductsGalleryPage from "./pages/ProductsGalleryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import CartPage from "./pages/CartPage";
@@ -40,6 +41,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/products" element={<ProductsPage />} />
+                <Route path="/products-gallery" element={<ProductsGalleryPage />} />
                 <Route path="/product/:slug" element={<ProductDetailPage />} />
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/cart" element={<CartPage />} />
