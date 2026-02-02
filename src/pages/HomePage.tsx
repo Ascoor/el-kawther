@@ -12,12 +12,11 @@ import { useTheme } from '@/contexts/ThemeContext';
 import patternLight from '@/assets/pattern-light.png';
 import patternDark from '@/assets/pattern-dark.png';
 import {
-  beefCubes,
-  frozenFries,
-  frozenMixedVegetables,
-  oliveOil,
-  reginaSpaghetti,
-} from '@/assets/products';
+  slide1,
+  slide2,
+  slide3,
+  slide4,
+} from '@/assets/slides';
 
 export default function HomePage() {
   const { t, isArabic } = useLanguage();
@@ -52,20 +51,25 @@ export default function HomePage() {
 
   const heroSlides = [
     {
-      image: frozenMixedVegetables,
+      image: slide1,
       alt: isArabic ? 'خضروات مجمدة' : 'Frozen mixed vegetables',
       gradient: 'linear-gradient(135deg, rgba(12, 129, 108, 0.85), rgba(6, 78, 59, 0.75))',
     },
     {
-      image: beefCubes,
+      image: slide2,
       alt: isArabic ? 'لحم بقري' : 'Beef cubes',
       gradient: 'linear-gradient(135deg, rgba(127, 29, 29, 0.85), rgba(88, 28, 135, 0.75))',
     },
     {
-      image: reginaSpaghetti,
-      alt: isArabic ? 'مكرونة ريچينا' : 'Regina spaghetti',
-      gradient: 'linear-gradient(135deg, rgba(194, 65, 12, 0.85), rgba(124, 45, 18, 0.75))',
-    },
+      image: slide3,
+      alt: isArabic ? 'لحم بقري' : 'Beef cubes',
+      gradient: 'linear-gradient(135deg, rgba(127, 29, 29, 0.85), rgba(88, 28, 135, 0.75))',
+      },
+      {
+        image: slide4,
+        alt: isArabic ? 'مكرونة ريچينا' : 'Regina spaghetti',
+        gradient: 'linear-gradient(135deg, rgba(194, 65, 12, 0.85), rgba(124, 45, 18, 0.75))',
+      },
   ];
 
   return (
@@ -80,13 +84,13 @@ export default function HomePage() {
           }}
         />
         <img
-          src={frozenFries}
+          src={slide3}
           alt=""
           className="hero-side-image hero-side-left"
           aria-hidden="true"
         />
         <img
-          src={oliveOil}
+          src={slide2}
           alt=""
           className="hero-side-image hero-side-right"
           aria-hidden="true"
