@@ -47,17 +47,32 @@ export default function HomePage() {
     {
       image: slide1,
       alt: isArabic ? 'خضروات مجمدة' : 'Frozen mixed vegetables',
-      gradient: 'linear-gradient(135deg, rgba(12, 129, 108, 0.85), rgba(6, 78, 59, 0.75))',
+      kicker: isArabic ? 'خضروات مجمدة' : 'Frozen Essentials',
+      title: isArabic ? 'نكهات طازجة لمدة أطول' : 'Freshness that lasts',
+      description: isArabic
+        ? 'خضروات مختارة بعناية تُحفظ بأعلى جودة.'
+        : 'Carefully selected veggies preserved at peak quality.',
+      gradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.82), rgba(13, 148, 136, 0.55) 45%, rgba(6, 78, 59, 0.4))',
     },
     {
       image: slide2,
       alt: isArabic ? 'لحم بقري' : 'Beef cubes',
-      gradient: 'linear-gradient(135deg, rgba(127, 29, 29, 0.85), rgba(88, 28, 135, 0.75))',
+      kicker: isArabic ? 'لحوم مختارة' : 'Prime Cuts',
+      title: isArabic ? 'مصادر موثوقة وجودة عالية' : 'Trusted sourcing, rich flavor',
+      description: isArabic
+        ? 'قطع لحم بقري مثالية للطبخ اليومي.'
+        : 'Premium beef cuts ready for everyday meals.',
+      gradient: 'linear-gradient(135deg, rgba(153, 27, 27, 0.82), rgba(190, 24, 93, 0.55) 45%, rgba(88, 28, 135, 0.35))',
     },
     {
       image: slide3,
       alt: isArabic ? 'مكرونة ريچينا' : 'Regina spaghetti',
-      gradient: 'linear-gradient(135deg, rgba(194, 65, 12, 0.85), rgba(124, 45, 18, 0.75))',
+      kicker: isArabic ? 'أساسيات المطبخ' : 'Pantry Staples',
+      title: isArabic ? 'مكونات يومية بطعم احترافي' : 'Everyday ingredients, pro taste',
+      description: isArabic
+        ? 'مكرونة ممتازة جاهزة لأشهى الوصفات.'
+        : 'Premium pasta for comforting recipes.',
+      gradient: 'linear-gradient(135deg, rgba(251, 146, 60, 0.8), rgba(234, 88, 12, 0.55) 45%, rgba(124, 45, 18, 0.35))',
     },
   ];
 
@@ -102,10 +117,9 @@ export default function HomePage() {
 
     // dx > 0 means swipe right
     if (dx > 0) {
-      // In Arabic, swipe right feels like "next" visually? keep it intuitive:
-      isArabic ? prev() : prev();
+      isArabic ? next() : prev();
     } else {
-      isArabic ? next() : next();
+      isArabic ? prev() : next();
     }
   };
 
@@ -135,20 +149,40 @@ export default function HomePage() {
         <img src={slide6} alt="" className="hero-side-image hero-side-left" aria-hidden="true" />
         <img src={slide7} alt="" className="hero-side-image hero-side-right" aria-hidden="true" />
 
-        <div className="container relative py-20 md:py-32">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-center">
+        <div className="container relative py-20 md:py-32 lg:py-36">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] items-center">
             {/* Text */}
             <div className="max-w-2xl space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm uppercase tracking-[0.2em] text-white/80">
+                <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                {isArabic ? 'تسوق بذكاء' : 'Shop Smarter'}
+              </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 {t('home.hero.title')}
               </h1>
               <p className="text-xl md:text-2xl opacity-90">{t('home.hero.subtitle')}</p>
+
+              <div className="grid gap-3 text-base text-white/80 sm:grid-cols-2">
+                <div className="flex items-center gap-2">
+                  <Snowflake className="h-5 w-5 text-emerald-200" />
+                  <span>{isArabic ? 'حفظ مثالي للمنتجات' : 'Perfectly preserved quality'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Truck className="h-5 w-5 text-emerald-200" />
+                  <span>{isArabic ? 'توصيل سريع ومبرد' : 'Fast, chilled delivery'}</span>
+                </div>
+              </div>
 
               <div className="flex flex-wrap gap-4 pt-4">
                 <Link to="/products">
                   <Button size="lg" variant="secondary" className="text-lg gap-2">
                     {t('home.hero.cta')}
                     <ArrowRight className={`h-5 w-5 ${isArabic ? 'rotate-180' : ''}`} />
+                  </Button>
+                </Link>
+                <Link to="/categories">
+                  <Button size="lg" variant="outline" className="text-lg text-white border-white/40 hover:bg-white/10">
+                    {t('home.categories.title')}
                   </Button>
                 </Link>
               </div>
@@ -163,7 +197,7 @@ export default function HomePage() {
               onBlurCapture={() => setPaused(false)}
             >
               <div
-                className="relative h-[280px] sm:h-[320px] md:h-[360px] lg:h-[420px] rounded-2xl overflow-hidden shadow-xl"
+                className="relative h-[300px] sm:h-[340px] md:h-[380px] lg:h-[440px] rounded-3xl overflow-hidden shadow-2xl"
                 onTouchStart={onTouchStart}
                 onTouchEnd={onTouchEnd}
                 role="region"
@@ -177,17 +211,39 @@ export default function HomePage() {
                       key={slide.alt}
                       aria-hidden={!isActive}
                       className={[
-                        'absolute inset-0 transition-all duration-700 ease-out',
-                        isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.03]',
+                        'absolute inset-0 transition-all duration-700 ease-out motion-reduce:transition-none',
+                        isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.03] motion-reduce:scale-100',
                       ].join(' ')}
-                      style={{
-                        backgroundImage: `${slide.gradient}, url(${isDark ? patternDark : patternLight}), url(${slide.image})`,
-                        backgroundSize: 'cover, 300px, cover',
-                        backgroundPosition: 'center',
-                      }}
                     >
-                      {/* soft overlay for text contrast if you add captions later */}
-                      <div className="absolute inset-0 bg-black/10" />
+                      <img
+                        src={slide.image}
+                        alt={slide.alt}
+                        className="h-full w-full object-cover"
+                        loading={idx === 0 ? 'eager' : 'lazy'}
+                        decoding="async"
+                      />
+                      <div
+                        className="absolute inset-0"
+                        style={{ backgroundImage: slide.gradient }}
+                      />
+                      <div className="absolute inset-0 bg-black/15 dark:bg-black/30" />
+                      <div
+                        className="absolute inset-0 opacity-20"
+                        style={{
+                          backgroundImage: `url(${isDark ? patternDark : patternLight})`,
+                          backgroundSize: '280px',
+                        }}
+                      />
+
+                      <div className="absolute inset-0 flex items-end p-6 sm:p-8">
+                        <div className="max-w-xs space-y-2 text-white">
+                          <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur">
+                            {slide.kicker}
+                          </span>
+                          <p className="text-lg font-semibold">{slide.title}</p>
+                          <p className="text-sm text-white/80">{slide.description}</p>
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
@@ -196,7 +252,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={isArabic ? next : prev}
-                  className="absolute top-1/2 -translate-y-1/2 left-3 z-10 h-10 w-10 rounded-full bg-background/20 hover:bg-background/30 backdrop-blur border border-white/20 flex items-center justify-center"
+                  className="absolute top-1/2 -translate-y-1/2 left-3 z-10 h-11 w-11 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur border border-white/30 flex items-center justify-center"
                   aria-label={isArabic ? 'التالي' : 'Previous'}
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -205,7 +261,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={isArabic ? prev : next}
-                  className="absolute top-1/2 -translate-y-1/2 right-3 z-10 h-10 w-10 rounded-full bg-background/20 hover:bg-background/30 backdrop-blur border border-white/20 flex items-center justify-center"
+                  className="absolute top-1/2 -translate-y-1/2 right-3 z-10 h-11 w-11 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur border border-white/30 flex items-center justify-center"
                   aria-label={isArabic ? 'السابق' : 'Next'}
                 >
                   <ChevronRight className="h-5 w-5" />
