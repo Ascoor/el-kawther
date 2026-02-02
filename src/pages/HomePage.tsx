@@ -11,6 +11,13 @@ import { useStore } from '@/contexts/StoreContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import patternLight from '@/assets/pattern-light.png';
 import patternDark from '@/assets/pattern-dark.png';
+import {
+  beefCubes,
+  frozenFries,
+  frozenMixedVegetables,
+  oliveOil,
+  reginaSpaghetti,
+} from '@/assets/products';
 
 export default function HomePage() {
   const { t, isArabic } = useLanguage();
@@ -43,6 +50,24 @@ export default function HomePage() {
     },
   ];
 
+  const heroSlides = [
+    {
+      image: frozenMixedVegetables,
+      alt: isArabic ? 'خضروات مجمدة' : 'Frozen mixed vegetables',
+      gradient: 'linear-gradient(135deg, rgba(12, 129, 108, 0.85), rgba(6, 78, 59, 0.75))',
+    },
+    {
+      image: beefCubes,
+      alt: isArabic ? 'لحم بقري' : 'Beef cubes',
+      gradient: 'linear-gradient(135deg, rgba(127, 29, 29, 0.85), rgba(88, 28, 135, 0.75))',
+    },
+    {
+      image: reginaSpaghetti,
+      alt: isArabic ? 'مكرونة ريچينا' : 'Regina spaghetti',
+      gradient: 'linear-gradient(135deg, rgba(194, 65, 12, 0.85), rgba(124, 45, 18, 0.75))',
+    },
+  ];
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -54,21 +79,51 @@ export default function HomePage() {
             backgroundSize: '300px',
           }}
         />
+        <img
+          src={frozenFries}
+          alt=""
+          className="hero-side-image hero-side-left"
+          aria-hidden="true"
+        />
+        <img
+          src={oliveOil}
+          alt=""
+          className="hero-side-image hero-side-right"
+          aria-hidden="true"
+        />
         <div className="container relative py-20 md:py-32">
-          <div className="max-w-2xl space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              {t('home.hero.title')}
-            </h1>
-            <p className="text-xl md:text-2xl opacity-90">
-              {t('home.hero.subtitle')}
-            </p>
-            <div className="flex flex-wrap gap-4 pt-4">
-              <Link to="/products">
-                <Button size="lg" variant="secondary" className="text-lg gap-2">
-                  {t('home.hero.cta')}
-                  <ArrowRight className={`h-5 w-5 ${isArabic ? 'rotate-180' : ''}`} />
-                </Button>
-              </Link>
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-center">
+            <div className="max-w-2xl space-y-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                {t('home.hero.title')}
+              </h1>
+              <p className="text-xl md:text-2xl opacity-90">
+                {t('home.hero.subtitle')}
+              </p>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <Link to="/products">
+                  <Button size="lg" variant="secondary" className="text-lg gap-2">
+                    {t('home.hero.cta')}
+                    <ArrowRight className={`h-5 w-5 ${isArabic ? 'rotate-180' : ''}`} />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="hero-carousel">
+                {heroSlides.map((slide, index) => (
+                  <div
+                    key={slide.alt}
+                    className="hero-slide"
+                    role="img"
+                    aria-label={slide.alt}
+                    style={{
+                      backgroundImage: `${slide.gradient}, url(${isDark ? patternDark : patternLight}), url(${slide.image})`,
+                      animationDelay: `${index * 6}s`,
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
