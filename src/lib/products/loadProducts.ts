@@ -12,11 +12,64 @@ export interface NormalizedProduct {
 }
 
 const PLACEHOLDER_IMAGE = '/assets/products/placeholder.png';
+const IMAGE_INDEX_URL = '/assets/products/images_index.json';
 
 const SOURCE_CONFIG: Array<{ source: ProductSource; url: string }> = [
   { source: 'shopify', url: '/assets/products/products_shopify.csv' },
   { source: 'woocommerce', url: '/assets/products/products_woocommerce.csv' },
 ];
+
+type ImageIndex = Record<ProductCollection, Record<string, string>>;
+type ImageIndexStatus = 'unknown' | 'loaded' | 'missing' | 'error';
+
+let imageIndexPromise: Promise<ImageIndex | null> | null = null;
+let imageIndexStatus: ImageIndexStatus = 'unknown';
+
+const warnedMessages = new Set<string>();
+
+const isDev = import.meta.env?.DEV ?? false;
+
+const warnOnce = (message: string) => {
+  if (!isDev) {
+    return;
+  }
+  if (warnedMessages.has(message)) {
+    return;
+  }
+  warnedMessages.add(message);
+  console.warn(message);
+};
+
+const fetchImageIndex = async () => {
+  if (!imageIndexPromise) {
+    imageIndexPromise = (async () => {
+      try {
+        const response = await fetch(IMAGE_INDEX_URL);
+        if (!response.ok) {
+          imageIndexStatus = response.status === 404 ? 'missing' : 'error';
+          warnOnce(
+            `Images index could not be loaded (${response.status}). Run "node scripts/build-images-index.mjs".`,
+          );
+          return null;
+        }
+        const data = (await response.json()) as ImageIndex;
+        imageIndexStatus = 'loaded';
+        return data;
+      } catch (error) {
+        imageIndexStatus = 'error';
+        warnOnce(
+          `Images index could not be loaded (${
+            error instanceof Error ? error.message : 'unknown error'
+          }). Run "node scripts/build-images-index.mjs".`,
+        );
+        return null;
+      }
+    })();
+  }
+  return imageIndexPromise;
+};
+
+export const getImageIndexStatus = () => imageIndexStatus;
 
 const csvValue = (value: string | undefined) => (value ?? '').trim();
 
@@ -48,6 +101,30 @@ const extractFilename = (rawValue: string) => {
 
 const buildLocalImagePath = (collection: ProductCollection, filename: string) =>
   `/assets/products/${collection}-products/images/${filename}`;
+
+const resolveImagePath = (
+  collection: ProductCollection,
+  filename: string,
+  imageIndex: ImageIndex | null,
+) => {
+  if (!filename) {
+    warnOnce(`Missing image filename for ${collection} product record.`);
+    return PLACEHOLDER_IMAGE;
+  }
+
+  if (!imageIndex) {
+    warnOnce(`Images index missing, using placeholder for ${filename}.`);
+    return PLACEHOLDER_IMAGE;
+  }
+
+  const mapped = imageIndex[collection]?.[filename];
+  if (!mapped) {
+    warnOnce(`Image filename "${filename}" not found in ${collection} index.`);
+    return PLACEHOLDER_IMAGE;
+  }
+
+  return mapped || buildLocalImagePath(collection, filename);
+};
 
 const csvToRows = (csvText: string) => {
   const rows: string[][] = [];
@@ -120,6 +197,7 @@ const normalizeShopifyRecord = (
   record: Record<string, string>,
   index: number,
   collection: ProductCollection,
+  imageIndex: ImageIndex | null,
 ): NormalizedProduct | null => {
   const status = normalizeText(record['Status'] ?? '');
   if (status && status.toLowerCase() !== 'active') {
@@ -131,6 +209,7 @@ const normalizeShopifyRecord = (
   const vendor = csvValue(record['Vendor']);
   const category = csvValue(record['Product Category']);
   const imageFilename = extractFilename(csvValue(record['Image Src']));
+  const image = resolveImagePath(collection, imageFilename, imageIndex);
 
   const idBase = handle || title || `shopify-${index}`;
 
@@ -139,7 +218,7 @@ const normalizeShopifyRecord = (
     title: title || handle,
     brand: vendor,
     category,
-    image: imageFilename ? buildLocalImagePath(collection, imageFilename) : PLACEHOLDER_IMAGE,
+    image,
     source: 'shopify',
     collection,
   };
@@ -149,11 +228,13 @@ const normalizeWooCommerceRecord = (
   record: Record<string, string>,
   index: number,
   collection: ProductCollection,
+  imageIndex: ImageIndex | null,
 ): NormalizedProduct => {
   const title = csvValue(record['Name']);
   const category = csvValue(record['Categories']);
   const brand = csvValue(record['Brand']);
   const imageFilename = extractFilename(csvValue(record['Images']));
+  const image = resolveImagePath(collection, imageFilename, imageIndex);
 
   const idBase = title || `woocommerce-${index}`;
 
@@ -162,7 +243,7 @@ const normalizeWooCommerceRecord = (
     title,
     brand,
     category,
-    image: imageFilename ? buildLocalImagePath(collection, imageFilename) : PLACEHOLDER_IMAGE,
+    image,
     source: 'woocommerce',
     collection,
   };
@@ -235,6 +316,7 @@ export const loadProducts = async ({
   collections = ['egypt', 'local'],
   sources = ['shopify', 'woocommerce'],
 }: LoadProductsOptions = {}): Promise<NormalizedProduct[]> => {
+  const imageIndex = await fetchImageIndex();
   const desiredSources = SOURCE_CONFIG.filter((config) => sources.includes(config.source));
 
   const csvPayloads = await Promise.all(
@@ -250,9 +332,9 @@ export const loadProducts = async ({
       records
         .map((record, index) => {
           if (source === 'shopify') {
-            return normalizeShopifyRecord(record, index, collection);
+            return normalizeShopifyRecord(record, index, collection, imageIndex);
           }
-          return normalizeWooCommerceRecord(record, index, collection);
+          return normalizeWooCommerceRecord(record, index, collection, imageIndex);
         })
         .filter((item): item is NormalizedProduct => Boolean(item)),
     );

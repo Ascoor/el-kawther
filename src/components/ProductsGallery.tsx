@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import {
+  getImageIndexStatus,
   listCategories,
   loadProducts,
   NormalizedProduct,
@@ -33,6 +34,9 @@ const SOURCE_OPTIONS: Array<{ value: ProductSource | 'all'; label: string }> = [
 export function ProductsGallery() {
   const [products, setProducts] = useState<NormalizedProduct[]>([]);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [imageIndexStatus, setImageIndexStatus] = useState<
+    ReturnType<typeof getImageIndexStatus>
+  >('unknown');
   const [search, setSearch] = useState('');
   const [collectionFilter, setCollectionFilter] = useState<ProductCollection>('egypt');
   const [sourceFilter, setSourceFilter] = useState<ProductSource | 'all'>('all');
@@ -48,6 +52,7 @@ export function ProductsGallery() {
         const data = await loadProducts();
         if (isMounted) {
           setProducts(data);
+          setImageIndexStatus(getImageIndexStatus());
           setStatus('idle');
         }
       } catch (error) {
@@ -200,6 +205,13 @@ export function ProductsGallery() {
       {hasError && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
           Unable to load products right now. Please try again later.
+        </div>
+      )}
+
+      {(imageIndexStatus === 'missing' || imageIndexStatus === 'error') && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          Images index missing. Run <span className="font-medium">node scripts/build-images-index.mjs</span>{' '}
+          after copying the product images into the public assets folders.
         </div>
       )}
 
