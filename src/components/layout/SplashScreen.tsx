@@ -1,15 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-// عدّل مسار الشعار حسب مشروعك
-import logo from "@/assets/logo.png";
+import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Props = {
   onDone: () => void;
-  skipIfSeen?: boolean; // لو عايزه يشتغل مرة واحدة في السيشن
+  skipIfSeen?: boolean;
 };
 
+type Phase = "idle" | "flash" | "logoIn" | "moveToHeader";
+
 export function SplashScreen({ onDone, skipIfSeen = true }: Props) {
-  const [phase, setPhase] = useState<"flash" | "logoIn" | "moveUp">("flash");
+  const [phase, setPhase] = useState<Phase>("idle");
+  const { isDark } = useTheme();
+  const { isArabic } = useLanguage();
+
+  const logoSrc = useMemo(() => (isDark ? logoDark : logoLight), [isDark]);
+
+  const [moveVars, setMoveVars] = useState<{ dx: string; dy: string; s: string }>({
+    dx: "0px",
+    dy: "-220px",
+    s: "0.5",
+  });
 
   useEffect(() => {
     if (skipIfSeen) {
@@ -21,47 +35,85 @@ export function SplashScreen({ onDone, skipIfSeen = true }: Props) {
       sessionStorage.setItem("seen_splash", "1");
     }
 
-    const t1 = window.setTimeout(() => setPhase("logoIn"), 650);   // بعد الوميض
-    const t2 = window.setTimeout(() => setPhase("moveUp"), 1650);  // تحريك لفوق
-    const t3 = window.setTimeout(() => onDone(), 2150);            // إنهاء
+    const t0 = window.setTimeout(() => setPhase("idle"), 0);
+    const t1 = window.setTimeout(() => setPhase("flash"), 2000);
+    const t2 = window.setTimeout(() => setPhase("logoIn"), 3000);
+    const t3 = window.setTimeout(() => setPhase("moveToHeader"), 3500);
+    const t4 = window.setTimeout(() => onDone(), 4100);
 
     return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
+      [t0, t1, t2, t3, t4].forEach(window.clearTimeout);
     };
   }, [onDone, skipIfSeen]);
 
+  useEffect(() => {
+    const headerLogo = document.querySelector<HTMLElement>("[data-header-logo]");
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const startX = vw / 2;
+    const startY = vh / 2;
+
+    const splashSize = 96;
+
+    if (headerLogo) {
+      const rect = headerLogo.getBoundingClientRect();
+      const targetX = rect.left + rect.width / 2;
+      const targetY = rect.top + rect.height / 2;
+
+      const dx = targetX - startX;
+      const dy = targetY - startY;
+
+      const s = (rect.height || 40) / splashSize;
+
+      setMoveVars({ dx: `${dx}px`, dy: `${dy}px`, s: `${s}` });
+      return;
+    }
+
+    const padX = 24;
+    const padY = 12;
+
+    const targetX = isArabic ? vw - padX : padX;
+    const targetY = padY;
+
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+
+    setMoveVars({ dx: `${dx}px`, dy: `${dy}px`, s: "0.42" });
+  }, [isArabic]);
+
   return (
-    <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center">
-      {/* وميض بالمنتصف */}
+    <div className="fixed inset-0 z-[9999] bg-background">
       {phase === "flash" && (
-        <div
-          className="rounded-full bg-primary"
-          style={{
-            width: 18,
-            height: 18,
-            animation: "splash-flash 650ms ease-in-out",
-          }}
-        />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div
+            className="rounded-full bg-primary"
+            style={{
+              width: 18,
+              height: 18,
+              animation: "splash-flash 1000ms ease-in-out",
+            }}
+          />
+        </div>
       )}
 
-      {/* الشعار يظهر تدريجيًا ثم يتحرك لفوق */}
-      {(phase === "logoIn" || phase === "moveUp") && (
+      {(phase === "logoIn" || phase === "moveToHeader") && (
         <div
           className="absolute left-1/2 top-1/2"
           style={{
-            transform: "translate(-50%, -50%)",
+            ["--dx" as any]: moveVars.dx,
+            ["--dy" as any]: moveVars.dy,
+            ["--s" as any]: moveVars.s,
             animation:
               phase === "logoIn"
-                ? "splash-logo-in 550ms ease-out forwards"
-                : "splash-logo-move-up 500ms ease-in forwards",
+                ? "splash-logo-in 500ms ease-out forwards"
+                : "splash-logo-to-header 600ms ease-in forwards",
           }}
         >
           <img
-            src={logo}
+            src={logoSrc}
             alt="Logo"
-            className="h-20 w-20 md:h-24 md:w-24 object-contain"
+            className="h-24 w-24 object-contain"
             draggable={false}
           />
         </div>
