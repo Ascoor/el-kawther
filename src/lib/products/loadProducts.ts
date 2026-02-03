@@ -196,7 +196,10 @@ const normalizeShopifyRecord = (
   const handle = csvValue(record['Handle']);
   const title = csvValue(record['Title']);
   const vendor = csvValue(record['Vendor']);
-  const category = csvValue(record['Product Category']);
+  const category =
+    ['Product Category', 'Product Type', 'Type', 'Category']
+      .map((key) => csvValue(record[key]))
+      .find(Boolean) ?? '';
   const imageFilename = extractFilename(csvValue(record['Image Src']));
   const image = resolveImagePath(collection, imageFilename, imageIndex);
 
@@ -205,7 +208,7 @@ const normalizeShopifyRecord = (
   return {
     id: `shopify-${collection}-${idBase}-${index}`,
     title: title || handle,
-    brand: vendor,
+    brand: vendor || 'Unknown',
     category,
     image,
     source: 'shopify',
@@ -220,8 +223,13 @@ const normalizeWooCommerceRecord = (
   imageIndex: ImageIndex | null,
 ): NormalizedProduct => {
   const title = csvValue(record['Name']);
-  const category = csvValue(record['Categories']);
-  const brand = csvValue(record['Brand']);
+  const categoryRaw = csvValue(record['Categories']);
+  const category =
+    categoryRaw
+      .split(',')
+      .map((value) => value.trim())
+      .find(Boolean) ?? '';
+  const brand = csvValue(record['Brand']) || 'Unknown';
   const imageFilename = extractFilename(csvValue(record['Images']));
   const image = resolveImagePath(collection, imageFilename, imageIndex);
 
