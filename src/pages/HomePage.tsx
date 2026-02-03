@@ -7,21 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryTile } from "@/components/CategoryTile";
-import { FullBleedBackgroundSlider } from "@/components/FullBleedBackgroundSlider";
+import { HeroCollection } from "@/components/HeroCollection";
 
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useStore } from "@/contexts/StoreContext";
 
-import {
-  slide1,
-  slide2,
-  slide3,
-  slide4,
-  slide5,
-  slide6,
-  slide7,
-  slide8,
-} from "@/assets/slides";
 
 export default function HomePage() {
   const { t, isArabic } = useLanguage();
@@ -39,36 +29,9 @@ export default function HomePage() {
     { icon: Award, title: t("home.benefit3.title"), desc: t("home.benefit3.desc") },
   ];
 
-  const bgSlides = [
-    { src: slide1, alt: "slide 1" },
-    { src: slide2, alt: "slide 2" },
-    { src: slide3, alt: "slide 3" },
-    { src: slide4, alt: "slide 4" },
-    { src: slide5, alt: "slide 5" },
-    { src: slide6, alt: "slide 6" },
-    { src: slide7, alt: "slide 7" },
-    { src: slide8, alt: "slide 8" },
-  ];
-
   return (
     <Layout>
-      {/* HERO: Full width + responsive height */}
-      <section className="relative w-full  overflow-hidden">
-        <FullBleedBackgroundSlider
-          images={bgSlides}
-          isArabic={isArabic}
-          autoMs={5500}
-          className={[
-            "rounded-none",
-            // ✅ Responsive heights (اختيار 1: ارتفاع متدرّج)
-            "h-[320px] sm:h-[420px] md:h-[520px] lg:h-[640px]",
-            // ✅ لو عايزها Full Screen على الموبايل بدل السطر اللي فوق:
-            // "h-[100svh] md:h-[70vh] lg:h-[80vh]",
-          ].join(" ")}
-          showArrows
-          showDots
-        />
-      </section>
+      <HeroCollection />
 
       {/* Categories Section */}
       <section className="py-10 sm:py-14 md:py-16 bg-background">
