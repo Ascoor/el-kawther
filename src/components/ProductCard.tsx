@@ -34,6 +34,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const company = getCompanyById(product.companyId);
 
   const name = isArabic ? product.name_ar : product.name_en;
+  const imageSrc = product.images?.[0] || '/placeholder.svg';
   const baseWeight = product.weightOptions[0];
   const weightLabel = isArabic ? baseWeight?.label_ar : baseWeight?.label_en;
 
@@ -62,11 +63,12 @@ export function ProductCard({ product }: ProductCardProps) {
         
         <div className="relative aspect-square bg-muted overflow-hidden">
           <img 
-            src={product.images[0] || '/placeholder.svg'} 
+            src={imageSrc} 
             alt={name}
             onError={(event) => {
               event.currentTarget.src = '/placeholder.svg';
             }}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           
