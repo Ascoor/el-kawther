@@ -1,3 +1,6 @@
+import shopifyCsvRaw from '@/assets/products/products_shopify.csv?raw';
+import woocommerceCsvRaw from '@/assets/products/products_woocommerce.csv?raw';
+
 export type ProductSource = 'shopify' | 'woocommerce';
 export type ProductCollection = 'egypt' | 'local';
 
@@ -14,9 +17,9 @@ export interface NormalizedProduct {
 const PLACEHOLDER_IMAGE = '/assets/products/placeholder.png';
 const IMAGE_INDEX_URL = '/assets/products/images_index.json';
 
-const SOURCE_CONFIG: Array<{ source: ProductSource; url: string }> = [
-  { source: 'shopify', url: '/assets/products/products_shopify.csv' },
-  { source: 'woocommerce', url: '/assets/products/products_woocommerce.csv' },
+const SOURCE_CONFIG: Array<{ source: ProductSource; url: string; raw?: string }> = [
+  { source: 'shopify', url: '/assets/products/products_shopify.csv', raw: shopifyCsvRaw },
+  { source: 'woocommerce', url: '/assets/products/products_woocommerce.csv', raw: woocommerceCsvRaw },
 ];
 
 type ImageIndex = Record<ProductCollection, Record<string, string>>;
@@ -35,9 +38,51 @@ const warnOnce = (message: string) => {
   console.warn(message);
 };
 
+const buildIndexFromGlob = (entries: Record<string, string>) =>
+  Object.entries(entries).reduce<Record<string, string>>((acc, [path, url]) => {
+    const filename = path.split('/').pop() ?? '';
+    if (!filename || acc[filename]) {
+      return acc;
+    }
+    acc[filename] = url;
+    return acc;
+  }, {});
+
+const assetImageIndex: ImageIndex | null = (() => {
+  if (typeof import.meta === 'undefined' || !('glob' in import.meta)) {
+    return null;
+  }
+
+  const egyptImages = import.meta.glob<string>(
+    '@/assets/products/egypt-products/images/**/*.{png,jpg,jpeg,webp}',
+    { eager: true, import: 'default' },
+  );
+  const localImages = import.meta.glob<string>(
+    '@/assets/products/local-products/images/**/*.{png,jpg,jpeg,webp}',
+    { eager: true, import: 'default' },
+  );
+
+  const egyptIndex = buildIndexFromGlob(egyptImages);
+  const localIndex = buildIndexFromGlob(localImages);
+
+  if (Object.keys(egyptIndex).length === 0 && Object.keys(localIndex).length === 0) {
+    return null;
+  }
+
+  return {
+    egypt: egyptIndex,
+    local: localIndex,
+  };
+})();
+
 const fetchImageIndex = async () => {
   if (!imageIndexPromise) {
     imageIndexPromise = (async () => {
+      if (assetImageIndex) {
+        imageIndexStatus = 'loaded';
+        return assetImageIndex;
+      }
+
       try {
         const response = await fetch(IMAGE_INDEX_URL);
         if (!response.ok) {
@@ -70,49 +115,63 @@ const csvValue = (value: string | undefined) => (value ?? '').trim();
 
 const normalizeText = (value: string) => value.trim();
 
-const extractFilename = (rawValue: string) => {
-  if (!rawValue) return '';
+const extractImageInfo = (rawValue: string) => {
+  const result = {
+    filename: '',
+    url: '',
+  };
+
+  if (!rawValue) return result;
 
   const firstEntry = rawValue.split(',').map((entry) => entry.trim()).find(Boolean) ?? '';
-  if (!firstEntry) return '';
+  if (!firstEntry) return result;
 
   const sanitized = firstEntry.split('|')[0]?.trim() ?? '';
-  if (!sanitized) return '';
+  if (!sanitized) return result;
 
   try {
     const url = new URL(sanitized);
-    return decodeURIComponent(url.pathname.split('/').pop() ?? '');
+    result.filename = decodeURIComponent(url.pathname.split('/').pop() ?? '');
+    result.url = url.toString();
+    return result;
   } catch {
     const withoutQuery = sanitized.split('?')[0]?.split('#')[0] ?? '';
-    return decodeURIComponent(withoutQuery.split('/').pop() ?? '');
+    result.filename = decodeURIComponent(withoutQuery.split('/').pop() ?? '');
+    if (sanitized.startsWith('http') || sanitized.startsWith('//') || sanitized.startsWith('/')) {
+      result.url = sanitized;
+    }
+    return result;
   }
 };
 
-const buildLocalImagePath = (collection: ProductCollection, filename: string) =>
-  `/assets/products/${collection}-products/images/${filename}`;
-
 const resolveImagePath = (
   collection: ProductCollection,
-  filename: string,
+  imageInfo: ReturnType<typeof extractImageInfo>,
   imageIndex: ImageIndex | null,
 ) => {
-  if (!filename) {
+  if (!imageInfo.filename && !imageInfo.url) {
     warnOnce(`Missing image filename for ${collection} product record.`);
     return PLACEHOLDER_IMAGE;
   }
 
-  if (!imageIndex) {
-    warnOnce(`Images index missing, using placeholder for ${filename}.`);
-    return PLACEHOLDER_IMAGE;
+  if (imageIndex) {
+    const mapped = imageIndex[collection]?.[imageInfo.filename];
+    if (mapped) {
+      return mapped;
+    }
   }
 
-  const mapped = imageIndex[collection]?.[filename];
-  if (!mapped) {
-    warnOnce(`Image filename "${filename}" not found in ${collection} index.`);
-    return PLACEHOLDER_IMAGE;
+  if (imageInfo.url) {
+    return imageInfo.url;
   }
 
-  return mapped || buildLocalImagePath(collection, filename);
+  if (imageInfo.filename) {
+    warnOnce(`Image filename "${imageInfo.filename}" not found in ${collection} index.`);
+  } else {
+    warnOnce(`Images index missing, using placeholder for ${collection} product record.`);
+  }
+
+  return PLACEHOLDER_IMAGE;
 };
 
 const csvToRows = (csvText: string) => {
@@ -200,8 +259,8 @@ const normalizeShopifyRecord = (
     ['Product Category', 'Product Type', 'Type', 'Category']
       .map((key) => csvValue(record[key]))
       .find(Boolean) ?? '';
-  const imageFilename = extractFilename(csvValue(record['Image Src']));
-  const image = resolveImagePath(collection, imageFilename, imageIndex);
+  const imageInfo = extractImageInfo(csvValue(record['Image Src']));
+  const image = resolveImagePath(collection, imageInfo, imageIndex);
 
   const idBase = handle || title || `shopify-${index}`;
 
@@ -230,8 +289,8 @@ const normalizeWooCommerceRecord = (
       .map((value) => value.trim())
       .find(Boolean) ?? '';
   const brand = csvValue(record['Brand']) || 'Unknown';
-  const imageFilename = extractFilename(csvValue(record['Images']));
-  const image = resolveImagePath(collection, imageFilename, imageIndex);
+  const imageInfo = extractImageInfo(csvValue(record['Images']));
+  const image = resolveImagePath(collection, imageInfo, imageIndex);
 
   const idBase = title || `woocommerce-${index}`;
 
@@ -296,7 +355,11 @@ const resolveImageFallbacks = async (products: NormalizedProduct[]) => {
   return resolved;
 };
 
-const loadCsv = async (url: string) => {
+const loadCsv = async (url: string, raw?: string) => {
+  if (raw) {
+    return raw;
+  }
+
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Unable to load CSV from ${url}`);
@@ -319,7 +382,7 @@ export const loadProducts = async ({
   const csvPayloads = await Promise.all(
     desiredSources.map(async (config) => ({
       source: config.source,
-      csvText: await loadCsv(config.url),
+      csvText: await loadCsv(config.url, config.raw),
     })),
   );
 
