@@ -25,6 +25,20 @@ const categoryTextColors = {
   dairy: 'text-dairy',
 };
 
+const categoryBorderHover = {
+  frozen: 'hover:border-frozen/30',
+  meat: 'hover:border-meat/30',
+  grocery: 'hover:border-grocery/30',
+  dairy: 'hover:border-dairy/30',
+};
+
+const categoryIconBg = {
+  frozen: 'bg-frozen/20',
+  meat: 'bg-meat/20',
+  grocery: 'bg-grocery/20',
+  dairy: 'bg-dairy/20',
+};
+
 const categoryIcons = {
   frozen: Snowflake,
   meat: Drumstick,
@@ -42,12 +56,12 @@ export function CategoryTile({ category, productCount }: CategoryTileProps) {
       <Card className={cn(
         'group overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer border-2 border-transparent',
         categoryBgColors[category.colorToken],
-        `hover:border-${category.colorToken}/30`
+        categoryBorderHover[category.colorToken]
       )}>
         <CardContent className="p-6 flex flex-col items-center text-center gap-4">
           <div className={cn(
             'p-4 rounded-full transition-transform duration-300 group-hover:scale-110',
-            `bg-${category.colorToken}/20`
+            categoryIconBg[category.colorToken]
           )}>
             <Icon className={cn('h-10 w-10', categoryTextColors[category.colorToken])} strokeWidth={2} />
           </div>

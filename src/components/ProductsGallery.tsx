@@ -1,18 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import {
-  getImageIndexStatus,
-  listCategories,
-  loadProducts,
-  NormalizedProduct,
-  ProductCollection,
-  ProductSource,
-} from '@/lib/products/loadProducts';
+import { ProductCatalogTable } from '@/components/ProductCatalogTable';
+import { useStore } from '@/contexts/StoreContext';
+import { ProductCollection, ProductSource } from '@/lib/products/loadProducts';
 
 const SORT_OPTIONS = [
   { value: 'title', label: 'Title (A → Z)' },
@@ -32,48 +27,21 @@ const SOURCE_OPTIONS: Array<{ value: ProductSource | 'all'; label: string }> = [
 ];
 
 export function ProductsGallery() {
-  const [products, setProducts] = useState<NormalizedProduct[]>([]);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [imageIndexStatus, setImageIndexStatus] = useState<
-    ReturnType<typeof getImageIndexStatus>
-  >('unknown');
+  const {
+    normalizedProducts,
+    normalizedStatus,
+    imageIndexStatus,
+    normalizedCategories,
+  } = useStore();
   const [search, setSearch] = useState('');
   const [collectionFilter, setCollectionFilter] = useState<ProductCollection>('egypt');
   const [sourceFilter, setSourceFilter] = useState<ProductSource | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState<(typeof SORT_OPTIONS)[number]['value']>('title');
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchProducts = async () => {
-      setStatus('loading');
-      try {
-        const data = await loadProducts();
-        if (isMounted) {
-          setProducts(data);
-          setImageIndexStatus(getImageIndexStatus());
-          setStatus('idle');
-        }
-      } catch (error) {
-        console.error(error);
-        if (isMounted) {
-          setStatus('error');
-        }
-      }
-    };
-
-    fetchProducts();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const categories = useMemo(() => listCategories(products), [products]);
+  const [view, setView] = useState<'grid' | 'catalog'>('grid');
 
   const filteredProducts = useMemo(() => {
-    let result = products.filter((product) => product.collection === collectionFilter);
+    let result = normalizedProducts.filter((product) => product.collection === collectionFilter);
 
     if (sourceFilter !== 'all') {
       result = result.filter((product) => product.source === sourceFilter);
@@ -105,10 +73,10 @@ export function ProductsGallery() {
     });
 
     return result;
-  }, [products, collectionFilter, sourceFilter, categoryFilter, search, sortBy]);
+  }, [normalizedProducts, collectionFilter, sourceFilter, categoryFilter, search, sortBy]);
 
-  const isLoading = status === 'loading';
-  const hasError = status === 'error';
+  const isLoading = normalizedStatus === 'loading';
+  const hasError = normalizedStatus === 'error';
 
   return (
     <section className="space-y-8">
@@ -120,14 +88,30 @@ export function ProductsGallery() {
               {filteredProducts.length} product{filteredProducts.length === 1 ? '' : 's'}
             </p>
           </div>
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by title, brand, or category"
-              className="pl-9"
-            />
+          <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search by title, brand, or category"
+                className="pl-9"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={view === 'grid' ? 'default' : 'outline'}
+                onClick={() => setView('grid')}
+              >
+                Grid
+              </Button>
+              <Button
+                variant={view === 'catalog' ? 'default' : 'outline'}
+                onClick={() => setView('catalog')}
+              >
+                Catalog
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -165,9 +149,9 @@ export function ProductsGallery() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                {normalizedCategories.map((category) => (
+                  <SelectItem key={category.slug} value={category.name_en}>
+                    {category.name_en}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -215,44 +199,50 @@ export function ProductsGallery() {
         </div>
       )}
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {isLoading
-          ? Array.from({ length: 8 }).map((_, index) => (
-              <Card key={`skeleton-${index}`} className="animate-pulse">
-                <div className="aspect-square w-full bg-muted" />
-                <CardContent className="space-y-3 p-4">
-                  <div className="h-4 w-3/4 rounded bg-muted" />
-                  <div className="h-3 w-1/2 rounded bg-muted" />
-                  <div className="h-3 w-2/3 rounded bg-muted" />
-                </CardContent>
-              </Card>
-            ))
-          : filteredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden">
-                <div className="relative aspect-square bg-muted">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="h-full w-full object-cover"
-                    onError={(event) => {
-                      event.currentTarget.src = '/assets/products/placeholder.png';
-                    }}
-                  />
-                  <div className="absolute left-3 top-3 flex gap-2">
-                    <Badge variant="secondary" className="capitalize">
-                      {product.collection}
-                    </Badge>
-                    <Badge variant="outline">{product.source}</Badge>
+      {view === 'catalog' ? (
+        <ProductCatalogTable products={filteredProducts} />
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {isLoading
+            ? Array.from({ length: 8 }).map((_, index) => (
+                <Card key={`skeleton-${index}`} className="animate-pulse">
+                  <div className="aspect-square w-full bg-muted" />
+                  <CardContent className="space-y-3 p-4">
+                    <div className="h-4 w-3/4 rounded bg-muted" />
+                    <div className="h-3 w-1/2 rounded bg-muted" />
+                    <div className="h-3 w-2/3 rounded bg-muted" />
+                  </CardContent>
+                </Card>
+              ))
+            : filteredProducts.map((product) => (
+                <Card key={product.id} className="overflow-hidden">
+                  <div className="relative aspect-square bg-muted">
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className="h-full w-full object-cover"
+                      onError={(event) => {
+                        event.currentTarget.src = '/assets/products/placeholder.png';
+                      }}
+                    />
+                    <div className="absolute left-3 top-3 flex gap-2">
+                      <Badge variant="secondary" className="capitalize">
+                        {product.collection}
+                      </Badge>
+                      <Badge variant="outline">{product.source}</Badge>
+                    </div>
                   </div>
-                </div>
-                <CardContent className="space-y-2 p-4">
-                  <h3 className="text-lg font-semibold leading-snug">{product.title}</h3>
-                  <p className="text-sm text-muted-foreground">Brand: {product.brand || '—'}</p>
-                  <p className="text-sm text-muted-foreground">Category: {product.category || '—'}</p>
-                </CardContent>
-              </Card>
-            ))}
-      </div>
+                  <CardContent className="space-y-2 p-4">
+                    <h3 className="text-lg font-semibold leading-snug">{product.title}</h3>
+                    <p className="text-sm text-muted-foreground">Brand: {product.brand || '—'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Category: {product.category || '—'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+        </div>
+      )}
     </section>
   );
 }
