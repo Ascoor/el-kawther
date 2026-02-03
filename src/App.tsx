@@ -7,7 +7,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { StoreProvider } from "@/contexts/StoreContext";
 
-import HomePage from "./pages/HomePage";
+import HomeWithSplash from "./pages/HomeWithSplash";
+
 import ProductsPage from "./pages/ProductsPage";
 import ProductsGalleryPage from "./pages/ProductsGalleryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -39,7 +40,9 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<HomePage />} />
+// ...
+<Route path="/" element={<HomeWithSplash />} />
+
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products-gallery" element={<ProductsGalleryPage />} />
                 <Route path="/product/:slug" element={<ProductDetailPage />} />
