@@ -26,16 +26,11 @@ let imageIndexPromise: Promise<ImageIndex | null> | null = null;
 let imageIndexStatus: ImageIndexStatus = 'unknown';
 
 const warnedMessages = new Set<string>();
-
 const isDev = import.meta.env?.DEV ?? false;
 
 const warnOnce = (message: string) => {
-  if (!isDev) {
-    return;
-  }
-  if (warnedMessages.has(message)) {
-    return;
-  }
+  if (!isDev) return;
+  if (warnedMessages.has(message)) return;
   warnedMessages.add(message);
   console.warn(message);
 };
@@ -76,19 +71,13 @@ const csvValue = (value: string | undefined) => (value ?? '').trim();
 const normalizeText = (value: string) => value.trim();
 
 const extractFilename = (rawValue: string) => {
-  if (!rawValue) {
-    return '';
-  }
+  if (!rawValue) return '';
 
   const firstEntry = rawValue.split(',').map((entry) => entry.trim()).find(Boolean) ?? '';
-  if (!firstEntry) {
-    return '';
-  }
+  if (!firstEntry) return '';
 
   const sanitized = firstEntry.split('|')[0]?.trim() ?? '';
-  if (!sanitized) {
-    return '';
-  }
+  if (!sanitized) return '';
 
   try {
     const url = new URL(sanitized);
@@ -268,7 +257,7 @@ const checkImageExists = async (imageUrl: string) => {
     }
   }
 
-  return new Promise((resolve) => {
+  return new Promise<boolean>((resolve) => {
     const img = new Image();
     img.onload = () => resolve(true);
     img.onerror = () => resolve(false);
@@ -344,6 +333,6 @@ export const loadProducts = async ({
 };
 
 export const listCategories = (products: NormalizedProduct[]) =>
-  Array.from(new Set(products.map((product) => product.category).filter(Boolean))).sort(
-    (a, b) => a.localeCompare(b),
+  Array.from(new Set(products.map((product) => product.category).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b),
   );
