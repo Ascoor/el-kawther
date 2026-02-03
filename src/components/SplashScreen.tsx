@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
 
-// عدّل مسار الشعار حسب مشروعك
-import logo from "@/assets/logo.png";
+import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type Props = {
   onDone: () => void;
-  skipIfSeen?: boolean; // لو عايزه يشتغل مرة واحدة في السيشن
+  skipIfSeen?: boolean;
 };
 
 export function SplashScreen({ onDone, skipIfSeen = true }: Props) {
   const [phase, setPhase] = useState<"flash" | "logoIn" | "moveUp">("flash");
+  const { isDark } = useTheme();
+
+  const logoSrc = isDark ? logoDark : logoLight;
 
   useEffect(() => {
     if (skipIfSeen) {
@@ -21,9 +25,9 @@ export function SplashScreen({ onDone, skipIfSeen = true }: Props) {
       sessionStorage.setItem("seen_splash", "1");
     }
 
-    const t1 = window.setTimeout(() => setPhase("logoIn"), 650);   // بعد الوميض
-    const t2 = window.setTimeout(() => setPhase("moveUp"), 1650);  // تحريك لفوق
-    const t3 = window.setTimeout(() => onDone(), 2150);            // إنهاء
+    const t1 = window.setTimeout(() => setPhase("logoIn"), 650);
+    const t2 = window.setTimeout(() => setPhase("moveUp"), 1650);
+    const t3 = window.setTimeout(() => onDone(), 2150);
 
     return () => {
       window.clearTimeout(t1);
@@ -59,7 +63,7 @@ export function SplashScreen({ onDone, skipIfSeen = true }: Props) {
           }}
         >
           <img
-            src={logo}
+            src={logoSrc}
             alt="Logo"
             className="h-20 w-20 md:h-24 md:w-24 object-contain"
             draggable={false}

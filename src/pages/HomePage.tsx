@@ -53,7 +53,7 @@ export default function HomePage() {
   return (
     <Layout>
       {/* HERO: Full width + responsive height */}
-      <section className="relative w-full top-6 overflow-hidden">
+      <section className="relative w-full  overflow-hidden">
         <FullBleedBackgroundSlider
           images={bgSlides}
           isArabic={isArabic}
