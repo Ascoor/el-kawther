@@ -1,8 +1,22 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from 'react';
 import { 
   Category, Product, Cart, CartItem, Order, Coupon, User,
   CartItemWithProduct, CartTotals 
 } from '@/types';
+import { getImageIndexStatus, loadProducts, NormalizedProduct } from '@/lib/products/loadProducts';
+import {
+  buildCategoriesFromNormalized,
+  mergeUniqueCategories,
+  mergeUniqueProducts,
+} from '@/lib/products/validate';
 import { 
   categories as seedCategories, 
   products as seedProducts, 
@@ -16,6 +30,7 @@ interface StoreContextType {
   // Categories
   categories: Category[];
   getCategoryById: (id: string) => Category | undefined;
+  normalizedCategories: Array<{ name_en: string; name_ar?: string; slug: string }>;
   
   // Products
   products: Product[];
@@ -24,6 +39,9 @@ interface StoreContextType {
   updateProduct: (product: Product) => void;
   addProduct: (product: Product) => void;
   deleteProduct: (id: string) => void;
+  normalizedProducts: NormalizedProduct[];
+  normalizedStatus: 'idle' | 'loading' | 'error';
+  imageIndexStatus: ReturnType<typeof getImageIndexStatus>;
   
   // Cart
   cart: Cart;
@@ -85,6 +103,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(() => 
     loadFromStorage(STORAGE_KEYS.products, seedProducts)
   );
+  const [categories] = useState<Category[]>(() => mergeUniqueCategories([], seedCategories));
+  const [normalizedProducts, setNormalizedProducts] = useState<NormalizedProduct[]>([]);
+  const [normalizedStatus, setNormalizedStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [imageIndexStatus, setImageIndexStatus] = useState<
+    ReturnType<typeof getImageIndexStatus>
+  >('unknown');
   const [cart, setCart] = useState<Cart>(() => 
     loadFromStorage(STORAGE_KEYS.cart, { items: [] })
   );
@@ -105,9 +129,43 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => saveToStorage(STORAGE_KEYS.coupons, coupons), [coupons]);
   useEffect(() => saveToStorage(STORAGE_KEYS.user, user), [user]);
 
-  // Categories (static)
-  const categories = seedCategories;
-  const getCategoryById = useCallback((id: string) => categories.find(c => c.id === id), []);
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProducts = async () => {
+      setNormalizedStatus('loading');
+      try {
+        const data = await loadProducts();
+        if (isMounted) {
+          setNormalizedProducts(data);
+          setImageIndexStatus(getImageIndexStatus());
+          setNormalizedStatus('idle');
+        }
+      } catch (error) {
+        console.error(error);
+        if (isMounted) {
+          setNormalizedStatus('error');
+          setImageIndexStatus(getImageIndexStatus());
+        }
+      }
+    };
+
+    fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const normalizedCategories = useMemo(
+    () => buildCategoriesFromNormalized(normalizedProducts),
+    [normalizedProducts],
+  );
+
+  const getCategoryById = useCallback(
+    (id: string) => categories.find((category) => category.id === id),
+    [categories],
+  );
 
   // Products
   const getProductById = useCallback((id: string) => products.find(p => p.id === id), [products]);
@@ -119,7 +177,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
   
   const addProduct = useCallback((product: Product) => {
-    setProducts(prev => [...prev, product]);
+    setProducts(prev => mergeUniqueProducts(prev, [product]));
   }, []);
   
   const deleteProduct = useCallback((id: string) => {
@@ -318,12 +376,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     <StoreContext.Provider value={{
       categories,
       getCategoryById,
+      normalizedCategories,
       products,
       getProductById,
       getProductsByCategory,
       updateProduct,
       addProduct,
       deleteProduct,
+      normalizedProducts,
+      normalizedStatus,
+      imageIndexStatus,
       cart,
       cartItems,
       cartTotals,

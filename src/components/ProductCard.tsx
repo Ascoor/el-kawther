@@ -27,6 +27,13 @@ const categoryIcons = {
   dairy: Milk,
 };
 
+const categoryText = {
+  frozen: 'text-frozen',
+  meat: 'text-meat',
+  grocery: 'text-grocery',
+  dairy: 'text-dairy',
+};
+
 export function ProductCard({ product }: ProductCardProps) {
   const { t, isArabic } = useLanguage();
   const { addToCart, getCategoryById } = useStore();
@@ -100,7 +107,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Category label */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             {category && React.createElement(categoryIcons[category.colorToken], { 
-              className: cn('h-3.5 w-3.5', `text-${category.colorToken}`)
+              className: cn('h-3.5 w-3.5', categoryText[category.colorToken])
             })}
             <span>{isArabic ? category?.name_ar : category?.name_en}</span>
           </div>
