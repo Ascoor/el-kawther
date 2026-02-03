@@ -107,7 +107,7 @@ export function FullBleedBackgroundSlider({
           <img
             src={item.src}
             alt={item.alt ?? ""}
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-top"
             loading={active === 0 ? "eager" : "lazy"}
             decoding="async"
           />

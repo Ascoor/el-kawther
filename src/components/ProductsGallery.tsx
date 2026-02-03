@@ -37,6 +37,7 @@ export function ProductsGallery() {
   const [imageIndexStatus, setImageIndexStatus] = useState<
     ReturnType<typeof getImageIndexStatus>
   >('unknown');
+
   const [search, setSearch] = useState('');
   const [collectionFilter, setCollectionFilter] = useState<ProductCollection>('egypt');
   const [sourceFilter, setSourceFilter] = useState<ProductSource | 'all'>('all');
@@ -87,7 +88,7 @@ export function ProductsGallery() {
       const searchValue = search.toLowerCase();
       result = result.filter((product) =>
         [product.title, product.brand, product.category].some((field) =>
-          field.toLowerCase().includes(searchValue),
+          (field ?? '').toLowerCase().includes(searchValue),
         ),
       );
     }
@@ -95,12 +96,12 @@ export function ProductsGallery() {
     result = [...result].sort((a, b) => {
       switch (sortBy) {
         case 'brand':
-          return a.brand.localeCompare(b.brand);
+          return (a.brand ?? '').localeCompare(b.brand ?? '');
         case 'category':
-          return a.category.localeCompare(b.category);
+          return (a.category ?? '').localeCompare(b.category ?? '');
         case 'title':
         default:
-          return a.title.localeCompare(b.title);
+          return (a.title ?? '').localeCompare(b.title ?? '');
       }
     });
 
@@ -173,6 +174,7 @@ export function ProductsGallery() {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
               <SelectTrigger>
@@ -187,6 +189,7 @@ export function ProductsGallery() {
               </SelectContent>
             </Select>
           </div>
+
           <Button
             variant="ghost"
             className="md:col-span-2 xl:col-span-2 justify-start"
@@ -210,8 +213,9 @@ export function ProductsGallery() {
 
       {(imageIndexStatus === 'missing' || imageIndexStatus === 'error') && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          Images index missing. Run <span className="font-medium">node scripts/build-images-index.mjs</span>{' '}
-          after copying the product images into the public assets folders.
+          Images index missing. Run{' '}
+          <span className="font-medium">node scripts/build-images-index.mjs</span> after copying the
+          product images into the public assets folders.
         </div>
       )}
 
