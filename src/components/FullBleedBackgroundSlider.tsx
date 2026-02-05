@@ -107,7 +107,7 @@ export function FullBleedBackgroundSlider({
           <img
             src={item.src}
             alt={item.alt ?? ""}
-            className="absolute inset-0 h-full w-full object-top"
+            className="absolute inset-0 h-full w-full object-cover object-center"
             loading={active === 0 ? "eager" : "lazy"}
             decoding="async"
           />
@@ -118,12 +118,12 @@ export function FullBleedBackgroundSlider({
             style={{
               backgroundImage:
                 item.gradient ??
-                "linear-gradient(135deg, rgba(0,0,0,0.55), rgba(0,0,0,0.10) 45%, rgba(0,0,0,0.55))",
+                "linear-gradient(135deg, rgba(8,12,20,0.35), rgba(8,12,20,0.08) 45%, rgba(8,12,20,0.3))",
             }}
           />
 
           {/* فينييت خفيف */}
-          <div className="absolute inset-0 bg-black/20 dark:bg-black/35" />
+          <div className="absolute inset-0 bg-black/10 dark:bg-black/25" />
 
           {/* Light sweep بسيط */}
           <motion.div

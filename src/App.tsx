@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { StoreProvider } from "@/contexts/StoreContext";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 
 import HomeWithSplash from "./pages/HomeWithSplash";
 
@@ -45,6 +46,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <Routes>
 // ...
 <Route path="/" element={<HomeWithSplash />} />
