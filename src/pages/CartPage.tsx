@@ -9,8 +9,10 @@ import { Layout } from '@/components/layout/Layout';
 import { QuantityStepper } from '@/components/QuantityStepper';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStore } from '@/contexts/StoreContext';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { FREE_SHIPPING_THRESHOLD } from '@/data/seedData';
+import { getCategoryThemeClass } from '@/lib/categoryStyles';
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -57,6 +59,7 @@ export default function CartPage() {
 
   const progressToFreeShipping = Math.min(100, (cartTotals.subtotal / FREE_SHIPPING_THRESHOLD) * 100);
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - cartTotals.subtotal;
+  const frozenCategoryClass = getCategoryThemeClass('frozen');
 
   return (
     <Layout>
@@ -118,7 +121,7 @@ export default function CartPage() {
                         {isArabic ? item.selectedWeight.label_ar : item.selectedWeight.label_en}
                       </p>
                       {item.product.isFrozen && (
-                        <div className="flex items-center gap-1 mt-2 text-xs text-frozen">
+                        <div className={cn('flex items-center gap-1 mt-2 text-xs category-text', frozenCategoryClass)}>
                           <Snowflake className="h-3 w-3" />
                           {t('badge.frozen')}
                         </div>
