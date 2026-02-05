@@ -26,9 +26,10 @@
    TableHeader,
    TableRow,
  } from '@/components/ui/table';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useStore } from '@/contexts/StoreContext';
- import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useStore } from '@/contexts/StoreContext';
+import { cn } from '@/lib/utils';
+import { getCategoryThemeClass } from '@/lib/categoryStyles';
  
  type StockFilter = 'all' | 'low' | 'out' | 'healthy';
  type SortField = 'name' | 'stock' | 'price' | 'category';
@@ -137,10 +138,13 @@
      });
    }, [products, categories]);
    
-   const getCategoryName = (categoryId: string) => {
-     const category = categories.find(c => c.id === categoryId);
-     return category ? (isArabic ? category.name_ar : category.name_en) : categoryId;
-   };
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? (isArabic ? category.name_ar : category.name_en) : categoryId;
+  };
+
+  const getCategoryClass = (token?: string) =>
+    getCategoryThemeClass(token as Parameters<typeof getCategoryThemeClass>[0]);
    
    const getStockStatus = (qty: number) => {
      if (qty === 0) return { label: isArabic ? 'نفد' : 'Out', color: 'destructive' as const };
@@ -463,15 +467,12 @@
              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                {categoryStats.map(cat => (
                  <Card key={cat.id} className="overflow-hidden">
-                   <CardHeader className={cn(
-                     'pb-3',
-                     {
-                       frozen: 'bg-frozen/10',
-                       meat: 'bg-meat/10',
-                       grocery: 'bg-grocery/10',
-                       dairy: 'bg-dairy/10',
-                     }[cat.colorToken] ?? 'bg-muted/20'
-                   )}>
+                   <CardHeader
+                     className={cn(
+                       'pb-3 category-soft-header',
+                       getCategoryClass(cat.colorToken),
+                     )}
+                   >
                      <CardTitle className="text-lg flex items-center justify-between">
                        <span>{isArabic ? cat.name_ar : cat.name_en}</span>
                        <Badge variant="secondary">{cat.productCount} {isArabic ? 'منتج' : 'items'}</Badge>

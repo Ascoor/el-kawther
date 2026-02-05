@@ -12,6 +12,7 @@ import { PriceDisplay } from '@/components/PriceDisplay';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStore } from '@/contexts/StoreContext';
 import { cn } from '@/lib/utils';
+import { getCategoryThemeClass } from '@/lib/categoryStyles';
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -38,6 +39,7 @@ export default function ProductDetailPage() {
   }
 
   const category = getCategoryById(product.categoryId);
+  const categoryClass = getCategoryThemeClass(category?.colorToken);
   const company = getCompanyById(product.companyId);
   const selectedWeight = product.weightOptions[selectedWeightIndex];
   const currentPrice = product.price + (selectedWeight?.priceDelta || 0);
@@ -59,13 +61,6 @@ export default function ProductDetailPage() {
     offer: t('badge.offer'),
   };
 
-  const categoryColors = {
-    frozen: 'bg-frozen',
-    meat: 'bg-meat',
-    grocery: 'bg-grocery',
-    dairy: 'bg-dairy',
-  };
-
   return (
     <Layout>
       <div className="container py-8">
@@ -83,7 +78,7 @@ export default function ProductDetailPage() {
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-              <div className={cn('absolute top-0 left-0 right-0 h-2', categoryColors[category?.colorToken || 'grocery'])} />
+              <div className={cn('absolute top-0 left-0 right-0 h-2 category-stripe', categoryClass)} />
               <img
                 src={product.images[0] || '/assets/products/placeholder.png'}
                 alt={(isArabic ? product.name_ar : product.name_en) || product.name_en || product.name_ar}
@@ -104,7 +99,7 @@ export default function ProductDetailPage() {
                   </Badge>
                 ))}
                 {product.isFrozen && (
-                  <Badge variant="outline" className="bg-frozen/20 text-frozen border-frozen/30">
+                  <Badge variant="outline" className="badge-category category-frozen">
                     <Snowflake className="h-3 w-3 me-1" />
                     {t('badge.frozen')}
                   </Badge>

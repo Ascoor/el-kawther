@@ -8,24 +8,11 @@ import { Product } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStore } from '@/contexts/StoreContext';
 import { cn } from '@/lib/utils';
+import { getCategoryThemeClass } from '@/lib/categoryStyles';
 
 interface ProductCardProps {
   product: Product;
 }
-
-const categoryColors = {
-  frozen: 'bg-frozen',
-  meat: 'bg-meat',
-  grocery: 'bg-grocery',
-  dairy: 'bg-dairy',
-};
-
-const categoryTextColors = {
-  frozen: 'text-frozen',
-  meat: 'text-meat',
-  grocery: 'text-grocery',
-  dairy: 'text-dairy',
-};
 
 const categoryIcons = {
   frozen: Snowflake,
@@ -38,6 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { t, isArabic } = useLanguage();
   const { addToCart, getCategoryById, getCompanyById } = useStore();
   const category = getCategoryById(product.categoryId);
+  const categoryClass = getCategoryThemeClass(category?.colorToken);
   const company = getCompanyById(product.companyId);
 
   const name = (isArabic ? product.name_ar : product.name_en) || product.name_en || product.name_ar;
@@ -66,7 +54,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <Link to={`/product/${product.slug}`}>
       <Card className="group overflow-hidden card-hover h-full">
         {/* Category Stripe */}
-        <div className={cn('h-1.5', categoryColors[category?.colorToken || 'grocery'])} />
+        <div className={cn('h-1.5 category-stripe', categoryClass)} />
         
         <div className="relative aspect-square bg-muted overflow-hidden">
           <img 
@@ -91,7 +79,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </Badge>
             ))}
             {product.isFrozen && (
-              <Badge variant="outline" className="bg-frozen/20 text-frozen border-frozen/30 text-xs">
+              <Badge variant="outline" className={cn('badge-category category-frozen category-border text-xs')}>
                 <Snowflake className="h-3 w-3 me-1" />
                 {t('badge.frozen')}
               </Badge>
@@ -108,9 +96,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <CardContent className="p-4 space-y-3">
           {/* Category label */}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className={cn('flex items-center gap-1.5 text-xs text-muted-foreground', categoryClass)}>
             {category && React.createElement(categoryIcons[category.colorToken] ?? Wheat, {
-              className: cn('h-3.5 w-3.5', categoryTextColors[category.colorToken] ?? 'text-foreground')
+              className: cn('h-3.5 w-3.5 category-text', categoryClass)
             })}
             <span>{(isArabic ? category?.name_ar : category?.name_en) || category?.name_en || category?.name_ar}</span>
           </div>
