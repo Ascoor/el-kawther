@@ -1,11 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  Package, ShoppingCart, DollarSign, AlertTriangle, 
-  TrendingUp, Clock, CheckCircle, Truck, Users, 
-  BarChart3, ArrowUpRight, ArrowDownRight, Boxes,
-  Calendar, RefreshCw
+import {
+  Package,
+  ShoppingCart,
+  DollarSign,
+  AlertTriangle,
+  TrendingUp,
+  BarChart3,
+  ArrowUpRight,
+  ArrowDownRight,
+  Boxes,
+  Calendar,
+  RefreshCw,
+  Ticket,
+  Plus,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -134,6 +143,33 @@ export default function AdminDashboard() {
     cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
   };
 
+  const quickActions = [
+    {
+      label: isArabic ? 'إضافة منتج' : 'Add Product',
+      path: '/admin/products',
+      icon: Plus,
+      description: isArabic ? 'إنشاء منتج جديد' : 'Create a new product',
+    },
+    {
+      label: isArabic ? 'طلبات اليوم' : 'Orders',
+      path: '/admin/orders',
+      icon: ShoppingCart,
+      description: isArabic ? 'مراجعة الطلبات' : 'Review orders',
+    },
+    {
+      label: isArabic ? 'المخزون' : 'Inventory',
+      path: '/admin/inventory',
+      icon: Boxes,
+      description: isArabic ? 'تحديث الكميات' : 'Update quantities',
+    },
+    {
+      label: isArabic ? 'الكوبونات' : 'Coupons',
+      path: '/admin/coupons',
+      icon: Ticket,
+      description: isArabic ? 'إدارة العروض' : 'Manage promotions',
+    },
+  ];
+
   return (
     <motion.div 
       className="space-y-6"
@@ -190,6 +226,39 @@ export default function AdminDashboard() {
             </Card>
           </motion.div>
         ))}
+      </motion.div>
+
+      {/* Most Wanted Actions */}
+      <motion.div variants={itemVariants}>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">
+              {isArabic ? 'الأزرار الأكثر استخداماً' : 'Most Wanted Actions'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link key={action.path} to={action.path} className="group">
+                    <div className="h-full rounded-lg border bg-card p-4 transition-all group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{action.label}</p>
+                          <p className="text-xs text-muted-foreground">{action.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Charts Row */}

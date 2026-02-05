@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, ShoppingCart, Ticket, 
-  ChevronLeft, ChevronRight, Menu, X, LogOut, Home, Boxes
+  ChevronLeft, ChevronRight, Menu, LogOut, Home, Boxes, Globe, Moon, Sun
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -177,9 +177,18 @@ function MobileSidebar() {
 }
 
 export default function AdminLayout() {
-  const { t, isArabic } = useLanguage();
+  const { t, isArabic, language, setLanguage } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
   const { user, isAdmin } = useStore();
   const [collapsed, setCollapsed] = React.useState(false);
+  const location = useLocation();
+
+  const activeItem = navItems.find((item) => location.pathname.startsWith(item.path));
+  const headerTitle = activeItem ? t(`admin.${activeItem.key}`) : t('admin.dashboard');
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'ar' ? 'en' : 'ar');
+  };
 
   // Redirect if not admin
   if (!user || !isAdmin) {
@@ -195,10 +204,29 @@ export default function AdminLayout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Mobile Header */}
-        <header className="lg:hidden h-14 border-b bg-card flex items-center px-4 gap-4">
-          <MobileSidebar />
-          <h1 className="font-semibold">{t('admin.dashboard')}</h1>
+        {/* Header */}
+        <header className="h-14 border-b bg-card flex items-center justify-between px-4 lg:px-6 gap-4">
+          <div className="flex items-center gap-3">
+            <MobileSidebar />
+            <h1 className="font-semibold">{headerTitle}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              className="relative"
+              title={language === 'ar' ? 'English' : 'العربية'}
+            >
+              <Globe className="h-5 w-5" />
+              <span className="absolute -bottom-1 text-[10px] font-bold">
+                {language === 'ar' ? 'EN' : 'ع'}
+              </span>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          </div>
         </header>
 
         {/* Page Content */}

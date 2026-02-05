@@ -14,6 +14,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -264,6 +265,11 @@ export default function AdminProducts() {
             <DialogTitle>
               {isCreating ? t('admin.addProduct') : t('admin.editProduct')}
             </DialogTitle>
+            <DialogDescription>
+              {isArabic
+                ? 'أدخل تفاصيل المنتج ثم احفظ التغييرات.'
+                : 'Update product details and save your changes.'}
+            </DialogDescription>
           </DialogHeader>
 
           {editingProduct && (
