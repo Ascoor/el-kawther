@@ -74,7 +74,6 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  products: 'kawther-products',
   cart: 'kawther-cart',
   orders: 'kawther-orders',
   coupons: 'kawther-coupons',
@@ -99,42 +98,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
 
-  const [products, setProducts] = useState<Product[]>(() =>
-    loadFromStorage(STORAGE_KEYS.products, [] as Product[]),
-  );
+  const [products, setProducts] = useState<Product[]>([]);
 
   const [cart, setCart] = useState<Cart>(() => loadFromStorage(STORAGE_KEYS.cart, { items: [] }));
   const [orders, setOrders] = useState<Order[]>(() => loadFromStorage(STORAGE_KEYS.orders, []));
   const [coupons, setCoupons] = useState<Coupon[]>(() => loadFromStorage(STORAGE_KEYS.coupons, seedCoupons));
   const [user, setUser] = useState<User | null>(() => loadFromStorage(STORAGE_KEYS.user, null));
 
-  // ✅ أول تشغيل: لو localStorage فاضي، حمّل من warehouse jsonl
+  // ✅ Load once from warehouse JSONL (single source of truth)
   useEffect(() => {
     let mounted = true;
 
     (async () => {
-      // لو عندك منتجات محفوظة في localStorage خلاص، سيبها
-      const stored = loadFromStorage<Product[]>(STORAGE_KEYS.products, []);
-      if (stored?.length) {
-        // بس لازم categories/companies كمان
+      try {
         await ensureWarehouseLoaded();
         if (!mounted) return;
-        setCategories(warehouseCategories as any);
-        setCompanies(warehouseCompanies as any);
-        return;
+        setCategories([...warehouseCategories]);
+        setCompanies([...warehouseCompanies]);
+        setProducts([...warehouseProducts]);
+      } catch (error) {
+        console.error('Failed to load warehouse products', error);
       }
-
-      await ensureWarehouseLoaded();
-      if (!mounted) return;
-
-      setCategories(warehouseCategories as any);
-      setCompanies(warehouseCompanies as any);
-
-      // خزّن المنتجات مرة واحدة في الستورج
-      setProducts((warehouseProducts as any).map((p: any) => ({
-        companyId: p.companyId || 'unknown',
-        ...p,
-      })));
     })();
 
     return () => {
@@ -143,7 +127,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Persist to localStorage
-  useEffect(() => saveToStorage(STORAGE_KEYS.products, products), [products]);
   useEffect(() => saveToStorage(STORAGE_KEYS.cart, cart), [cart]);
   useEffect(() => saveToStorage(STORAGE_KEYS.orders, orders), [orders]);
   useEffect(() => saveToStorage(STORAGE_KEYS.coupons, coupons), [coupons]);

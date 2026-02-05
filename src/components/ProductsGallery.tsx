@@ -1,18 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import {
-  getImageIndexStatus,
-  listCategories,
-  loadProducts,
-  NormalizedProduct,
-  ProductCollection,
-  ProductSource,
-} from '@/lib/products/loadProducts';
+import { useStore } from '@/contexts/StoreContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SORT_OPTIONS = [
   { value: 'title', label: 'Title (A → Z)' },
@@ -20,77 +14,80 @@ const SORT_OPTIONS = [
   { value: 'category', label: 'Category (A → Z)' },
 ] as const;
 
-const COLLECTION_OPTIONS: Array<{ value: ProductCollection; label: string }> = [
-  { value: 'egypt', label: 'Egypt' },
-  { value: 'local', label: 'Local' },
-];
-
-const SOURCE_OPTIONS: Array<{ value: ProductSource | 'all'; label: string }> = [
-  { value: 'all', label: 'All' },
-  { value: 'shopify', label: 'Shopify' },
-  { value: 'woocommerce', label: 'WooCommerce' },
-];
+type SortValue = (typeof SORT_OPTIONS)[number]['value'];
 
 export function ProductsGallery() {
-  const [products, setProducts] = useState<NormalizedProduct[]>([]);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-
-  const [imageIndexStatus, setImageIndexStatus] =
-    useState<ReturnType<typeof getImageIndexStatus>>('unknown');
+  const { products, categories, companies } = useStore();
+  const { isArabic } = useLanguage();
 
   const [search, setSearch] = useState('');
-  const [collectionFilter, setCollectionFilter] = useState<ProductCollection>('local');
-  const [sourceFilter, setSourceFilter] = useState<ProductSource | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<(typeof SORT_OPTIONS)[number]['value']>('title');
+  const [companyFilter, setCompanyFilter] = useState('all');
+  const [sortBy, setSortBy] = useState<SortValue>('title');
 
-  useEffect(() => {
-    let isMounted = true;
-
-    (async () => {
-      setStatus('loading');
-      try {
-        const data = await loadProducts();
-        if (!isMounted) return;
-
-        setProducts(data);
-        setImageIndexStatus(getImageIndexStatus());
-        setStatus('idle');
-      } catch (e) {
-        console.error(e);
-        if (isMounted) setStatus('error');
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const categories = useMemo(() => listCategories(products), [products]);
+  const categoryMap = useMemo(
+    () => new Map(categories.map((c) => [c.id, c])),
+    [categories],
+  );
+  const companyMap = useMemo(
+    () => new Map(companies.map((c) => [c.id, c])),
+    [companies],
+  );
 
   const filteredProducts = useMemo(() => {
-    let result = products.filter((p) => p.collection === collectionFilter);
+    let result = [...products];
 
-    if (sourceFilter !== 'all') result = result.filter((p) => p.source === sourceFilter);
-    if (categoryFilter !== 'all') result = result.filter((p) => p.category === categoryFilter);
+    if (categoryFilter !== 'all') {
+      result = result.filter((p) => p.categoryId === categoryFilter);
+    }
+
+    if (companyFilter !== 'all') {
+      result = result.filter((p) => p.companyId === companyFilter);
+    }
 
     if (search) {
       const s = search.toLowerCase();
-      result = result.filter((p) =>
-        [p.title, p.brand, p.category].some((f) => (f ?? '').toLowerCase().includes(s)),
-      );
+      result = result.filter((p) => {
+        const category = categoryMap.get(p.categoryId);
+        const company = companyMap.get(p.companyId);
+        return [
+          p.name_ar,
+          p.name_en,
+          p.desc_ar,
+          p.desc_en,
+          category?.name_ar,
+          category?.name_en,
+          company?.name_ar,
+          company?.name_en,
+        ]
+          .filter(Boolean)
+          .some((field) => String(field).toLowerCase().includes(s));
+      });
     }
 
     return [...result].sort((a, b) => {
-      if (sortBy === 'brand') return (a.brand ?? '').localeCompare(b.brand ?? '');
-      if (sortBy === 'category') return (a.category ?? '').localeCompare(b.category ?? '');
-      return (a.title ?? '').localeCompare(b.title ?? '');
-    });
-  }, [products, collectionFilter, sourceFilter, categoryFilter, search, sortBy]);
+      const aCategory = categoryMap.get(a.categoryId);
+      const bCategory = categoryMap.get(b.categoryId);
+      const aCompany = companyMap.get(a.companyId);
+      const bCompany = companyMap.get(b.companyId);
 
-  const isLoading = status === 'loading';
-  const hasError = status === 'error';
+      if (sortBy === 'brand') {
+        return (aCompany?.name_en || aCompany?.name_ar || '').localeCompare(
+          bCompany?.name_en || bCompany?.name_ar || '',
+        );
+      }
+
+      if (sortBy === 'category') {
+        return (aCategory?.name_en || aCategory?.name_ar || '').localeCompare(
+          bCategory?.name_en || bCategory?.name_ar || '',
+        );
+      }
+
+      return (a.name_en || a.name_ar || '').localeCompare(b.name_en || b.name_ar || '');
+    });
+  }, [products, categoryFilter, companyFilter, search, sortBy, categoryMap, companyMap]);
+
+  const isLoading = products.length === 0;
 
   return (
     <section className="space-y-8">
@@ -114,32 +111,6 @@ export function ProductsGallery() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-wrap gap-3">
-            {COLLECTION_OPTIONS.map((o) => (
-              <Button
-                key={o.value}
-                variant={collectionFilter === o.value ? 'default' : 'outline'}
-                onClick={() => setCollectionFilter(o.value)}
-              >
-                {o.label}
-              </Button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            {SOURCE_OPTIONS.map((o) => (
-              <Button
-                key={o.value}
-                variant={sourceFilter === o.value ? 'default' : 'outline'}
-                onClick={() => setSourceFilter(o.value as any)}
-              >
-                {o.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger>
@@ -148,14 +119,28 @@ export function ProductsGallery() {
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
               {categories.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
+                <SelectItem key={c.id} value={c.id}>
+                  {(isArabic ? c.name_ar : c.name_en) || c.name_en || c.name_ar}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+          <Select value={companyFilter} onValueChange={setCompanyFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Brand" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All brands</SelectItem>
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {(isArabic ? c.name_ar : c.name_en) || c.name_en || c.name_ar}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortValue)}>
             <SelectTrigger>
               <SelectValue placeholder="Sort" />
             </SelectTrigger>
@@ -170,11 +155,11 @@ export function ProductsGallery() {
 
           <Button
             variant="ghost"
-            className="md:col-span-2 xl:col-span-2 justify-start"
+            className="justify-start"
             onClick={() => {
               setSearch('');
               setCategoryFilter('all');
-              setSourceFilter('all');
+              setCompanyFilter('all');
               setSortBy('title');
             }}
           >
@@ -182,18 +167,6 @@ export function ProductsGallery() {
           </Button>
         </div>
       </div>
-
-      {hasError && (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-          Unable to load products right now. Please try again later.
-        </div>
-      )}
-
-      {(imageIndexStatus === 'missing' || imageIndexStatus === 'error') && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          Images index missing. Run <span className="font-medium">node scripts/build-images-index.mjs</span>
-        </div>
-      )}
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {isLoading
@@ -207,31 +180,54 @@ export function ProductsGallery() {
                 </CardContent>
               </Card>
             ))
-          : filteredProducts.map((p) => (
-              <Card key={p.id} className="overflow-hidden">
-                <div className="relative aspect-square bg-muted">
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '/assets/products/placeholder.png';
-                    }}
-                  />
-                  <div className="absolute left-3 top-3 flex gap-2">
-                    <Badge variant="secondary" className="capitalize">
-                      {p.collection}
-                    </Badge>
-                    <Badge variant="outline">{p.source}</Badge>
+          : filteredProducts.map((p) => {
+              const category = categoryMap.get(p.categoryId);
+              const company = companyMap.get(p.companyId);
+              const title = (isArabic ? p.name_ar : p.name_en) || p.name_en || p.name_ar;
+              return (
+                <Card key={p.id} className="overflow-hidden">
+                  <div className="relative aspect-square bg-muted">
+                    <img
+                      src={p.images?.[0] || '/assets/products/placeholder.png'}
+                      alt={title}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/assets/products/placeholder.png';
+                      }}
+                    />
+                    <div className="absolute left-3 top-3 flex gap-2">
+                      {category && (
+                        <Badge variant="secondary">
+                          {(isArabic ? category.name_ar : category.name_en) ||
+                            category.name_en ||
+                            category.name_ar}
+                        </Badge>
+                      )}
+                      {company && (
+                        <Badge variant="outline">
+                          {(isArabic ? company.name_ar : company.name_en) ||
+                            company.name_en ||
+                            company.name_ar}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <CardContent className="space-y-2 p-4">
-                  <h3 className="text-lg font-semibold leading-snug">{p.title}</h3>
-                  <p className="text-sm text-muted-foreground">Brand: {p.brand || '—'}</p>
-                  <p className="text-sm text-muted-foreground">Category: {p.category || '—'}</p>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="space-y-2 p-4">
+                    <h3 className="text-lg font-semibold leading-snug">{title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {company
+                        ? `${isArabic ? company.name_ar : company.name_en}`
+                        : '—'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {category
+                        ? `${isArabic ? category.name_ar : category.name_en}`
+                        : '—'}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
       </div>
     </section>
   );

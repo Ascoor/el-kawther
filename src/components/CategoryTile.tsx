@@ -35,13 +35,13 @@ const categoryIcons: Record<string, React.ElementType> = {
 export function CategoryTile({ category, productCount }: CategoryTileProps) {
   const { isArabic } = useLanguage();
 
-  const token = category.colorToken || category.slug || category.id || 'grocery';
+  const token = category.colorToken || 'grocery';
   const Icon = categoryIcons[token] ?? Boxes;
 
   const bg = categoryBgColors[token] ?? 'bg-muted/40 hover:bg-muted/60';
   const text = categoryTextColors[token] ?? 'text-foreground';
 
-  const name = isArabic ? category.name_ar : category.name_en;
+  const name = (isArabic ? category.name_ar : category.name_en) || category.name_en || category.name_ar;
 
   return (
     <Link to={`/products?category=${category.slug || category.id}`}>
