@@ -51,9 +51,7 @@ export default function HomePage() {
   ];
 
   return (
-    <Layout>
-      {/* HERO: Full width + responsive height */}
-      <section className="relative w-full overflow-hidden">
+    <Layout> 
         <FullBleedBackgroundSlider
           images={bgSlides}
           isArabic={isArabic}
@@ -67,39 +65,7 @@ export default function HomePage() {
           ].join(" ")}
           showArrows
           showDots
-        />
-        <div className="absolute inset-0 z-10 flex items-center">
-          <div className="container">
-            <div className="max-w-2xl space-y-4 text-white">
-              <p className="text-sm md:text-base uppercase tracking-[0.2em] text-white/80">
-                {isArabic ? "توريد موثوق" : "Trusted Supply"}
-              </p>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-                {t("home.hero.title")}
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl text-white/90">
-                {t("home.hero.subtitle")}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link to="/products">
-                  <Button size="lg" variant="secondary">
-                    {t("home.hero.cta")}
-                  </Button>
-                </Link>
-                <Link to="/categories">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/60 text-white hover:bg-white/10"
-                  >
-                    {t("home.categories.title")}
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        /> 
 
       {/* Categories Section */}
       <section className="py-10 sm:py-14 md:py-16 bg-background">
