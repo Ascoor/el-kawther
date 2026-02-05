@@ -1,8 +1,7 @@
-import shopifyCsvRaw from '@/assets/products/products_shopify.csv?raw';
-import woocommerceCsvRaw from '@/assets/products/products_woocommerce.csv?raw';
+// src/lib/products/loadProducts.ts
 
-export type ProductSource = 'shopify' | 'woocommerce';
-export type ProductCollection = 'egypt' | 'local';
+export type ProductSource = 'warehouse';
+export type ProductCollection = 'local';
 
 export interface NormalizedProduct {
   id: string;
@@ -14,357 +13,70 @@ export interface NormalizedProduct {
   collection: ProductCollection;
 }
 
-const PLACEHOLDER_IMAGE = '/assets/products/placeholder.png';
-const IMAGE_INDEX_URL = '/assets/products/images_index.json';
-
-const SOURCE_CONFIG: Array<{ source: ProductSource; url: string; raw?: string }> = [
-  { source: 'shopify', url: '/assets/products/products_shopify.csv', raw: shopifyCsvRaw },
-  { source: 'woocommerce', url: '/assets/products/products_woocommerce.csv', raw: woocommerceCsvRaw },
-];
-
-type ImageIndex = Record<ProductCollection, Record<string, string>>;
 type ImageIndexStatus = 'unknown' | 'loaded' | 'missing' | 'error';
 
-let imageIndexPromise: Promise<ImageIndex | null> | null = null;
+const PLACEHOLDER_IMAGE = '/assets/products/placeholder.png';
+
+// مكان ملف JSONL على المتصفح (public/...)
+const WAREHOUSE_JSONL_URL = '/assets/images/warehouse_products.jsonl';
+
+// انت كنت بتحمّل الصور هنا: public/assets/images/products
+const LOCAL_IMAGES_PREFIX = '/assets/images/products';
+
+// لو الداتا بتاعتك فيها local_image بصيغة /images/products/... هنحوّلها للمسار الصحيح
+const normalizeLocalImagePath = (value: string) => {
+  if (!value) return '';
+  // مثال: /images/products/353.jpg  ->  /assets/images/products/353.jpg
+  if (value.startsWith('/images/products/')) {
+    return value.replace('/images/products/', `${LOCAL_IMAGES_PREFIX}/`);
+  }
+  // لو موجودة أصلاً صح
+  if (value.startsWith('/assets/images/products/')) return value;
+
+  // لو قيمة نسبية
+  if (value.startsWith('images/products/')) return `/${value}`;
+
+  return value;
+};
+
 let imageIndexStatus: ImageIndexStatus = 'unknown';
-
-const warnedMessages = new Set<string>();
-const isDev = import.meta.env?.DEV ?? false;
-
-const warnOnce = (message: string) => {
-  if (!isDev) return;
-  if (warnedMessages.has(message)) return;
-  warnedMessages.add(message);
-  console.warn(message);
-};
-
-const buildIndexFromGlob = (entries: Record<string, string>) =>
-  Object.entries(entries).reduce<Record<string, string>>((acc, [path, url]) => {
-    const filename = path.split('/').pop() ?? '';
-    if (!filename || acc[filename]) {
-      return acc;
-    }
-    acc[filename] = url;
-    return acc;
-  }, {});
-
-const assetImageIndex: ImageIndex | null = (() => {
-  if (typeof import.meta === 'undefined' || !('glob' in import.meta)) {
-    return null;
-  }
-
-  const egyptImages = import.meta.glob<string>(
-    '@/assets/products/egypt-products/images/**/*.{png,jpg,jpeg,webp}',
-    { eager: true, import: 'default' },
-  );
-  const localImages = import.meta.glob<string>(
-    '@/assets/products/local-products/images/**/*.{png,jpg,jpeg,webp}',
-    { eager: true, import: 'default' },
-  );
-
-  const egyptIndex = buildIndexFromGlob(egyptImages);
-  const localIndex = buildIndexFromGlob(localImages);
-
-  if (Object.keys(egyptIndex).length === 0 && Object.keys(localIndex).length === 0) {
-    return null;
-  }
-
-  return {
-    egypt: egyptIndex,
-    local: localIndex,
-  };
-})();
-
-const fetchImageIndex = async () => {
-  if (!imageIndexPromise) {
-    imageIndexPromise = (async () => {
-      if (assetImageIndex) {
-        imageIndexStatus = 'loaded';
-        return assetImageIndex;
-      }
-
-      try {
-        const response = await fetch(IMAGE_INDEX_URL);
-        if (!response.ok) {
-          imageIndexStatus = response.status === 404 ? 'missing' : 'error';
-          warnOnce(
-            `Images index could not be loaded (${response.status}). Run "node scripts/build-images-index.mjs".`,
-          );
-          return null;
-        }
-        const data = (await response.json()) as ImageIndex;
-        imageIndexStatus = 'loaded';
-        return data;
-      } catch (error) {
-        imageIndexStatus = 'error';
-        warnOnce(
-          `Images index could not be loaded (${
-            error instanceof Error ? error.message : 'unknown error'
-          }). Run "node scripts/build-images-index.mjs".`,
-        );
-        return null;
-      }
-    })();
-  }
-  return imageIndexPromise;
-};
-
 export const getImageIndexStatus = () => imageIndexStatus;
 
-const csvValue = (value: string | undefined) => (value ?? '').trim();
-
-const normalizeText = (value: string) => value.trim();
-
-const extractImageInfo = (rawValue: string) => {
-  const result = {
-    filename: '',
-    url: '',
-  };
-
-  if (!rawValue) return result;
-
-  const firstEntry = rawValue.split(',').map((entry) => entry.trim()).find(Boolean) ?? '';
-  if (!firstEntry) return result;
-
-  const sanitized = firstEntry.split('|')[0]?.trim() ?? '';
-  if (!sanitized) return result;
-
-  try {
-    const url = new URL(sanitized);
-    result.filename = decodeURIComponent(url.pathname.split('/').pop() ?? '');
-    result.url = url.toString();
-    return result;
-  } catch {
-    const withoutQuery = sanitized.split('?')[0]?.split('#')[0] ?? '';
-    result.filename = decodeURIComponent(withoutQuery.split('/').pop() ?? '');
-    if (sanitized.startsWith('http') || sanitized.startsWith('//') || sanitized.startsWith('/')) {
-      result.url = sanitized;
+const parseJsonl = (text: string) => {
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const items: any[] = [];
+  for (const line of lines) {
+    try {
+      items.push(JSON.parse(line));
+    } catch {
+      // لو فيه سطر بايظ، نتجاهله
     }
-    return result;
   }
+  return items;
 };
 
-const resolveImagePath = (
-  collection: ProductCollection,
-  imageInfo: ReturnType<typeof extractImageInfo>,
-  imageIndex: ImageIndex | null,
-) => {
-  if (!imageInfo.filename && !imageInfo.url) {
-    warnOnce(`Missing image filename for ${collection} product record.`);
-    return PLACEHOLDER_IMAGE;
-  }
+const toNormalized = (row: any): NormalizedProduct | null => {
+  const id = String(row.product_id ?? '').trim();
+  if (!id) return null;
 
-  if (imageIndex) {
-    const mapped = imageIndex[collection]?.[imageInfo.filename];
-    if (mapped) {
-      return mapped;
-    }
-  }
+  const title = String(row.name ?? '').trim() || `Product ${id}`;
+  const brand = String(row.brand_name ?? '').trim() || 'Unknown';
+  const category = String(row.category_name ?? '').trim() || '';
 
-  if (imageInfo.url) {
-    return imageInfo.url;
-  }
+  const local = normalizeLocalImagePath(String(row.local_image ?? '').trim());
+  const remote = String(row.image_url ?? '').trim();
 
-  if (imageInfo.filename) {
-    warnOnce(`Image filename "${imageInfo.filename}" not found in ${collection} index.`);
-  } else {
-    warnOnce(`Images index missing, using placeholder for ${collection} product record.`);
-  }
-
-  return PLACEHOLDER_IMAGE;
-};
-
-const csvToRows = (csvText: string) => {
-  const rows: string[][] = [];
-  let currentRow: string[] = [];
-  let currentValue = '';
-  let inQuotes = false;
-
-  for (let index = 0; index < csvText.length; index += 1) {
-    const char = csvText[index];
-
-    if (char === '"') {
-      if (inQuotes && csvText[index + 1] === '"') {
-        currentValue += '"';
-        index += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-
-    if (char === ',' && !inQuotes) {
-      currentRow.push(currentValue);
-      currentValue = '';
-      continue;
-    }
-
-    if ((char === '\n' || char === '\r') && !inQuotes) {
-      if (char === '\r' && csvText[index + 1] === '\n') {
-        index += 1;
-      }
-
-      currentRow.push(currentValue);
-      if (currentRow.some((value) => value.trim().length > 0)) {
-        rows.push(currentRow);
-      }
-      currentRow = [];
-      currentValue = '';
-      continue;
-    }
-
-    currentValue += char;
-  }
-
-  currentRow.push(currentValue);
-  if (currentRow.some((value) => value.trim().length > 0)) {
-    rows.push(currentRow);
-  }
-
-  return rows;
-};
-
-const csvToRecords = (csvText: string) => {
-  const rows = csvToRows(csvText);
-  if (rows.length === 0) {
-    return [] as Record<string, string>[];
-  }
-
-  const [headerRow, ...dataRows] = rows;
-  const headers = headerRow.map((header) => header.trim());
-
-  return dataRows.map((row) =>
-    headers.reduce((record, header, index) => {
-      record[header] = row[index] ?? '';
-      return record;
-    }, {} as Record<string, string>),
-  );
-};
-
-const normalizeShopifyRecord = (
-  record: Record<string, string>,
-  index: number,
-  collection: ProductCollection,
-  imageIndex: ImageIndex | null,
-): NormalizedProduct | null => {
-  const status = normalizeText(record['Status'] ?? '');
-  if (status && status.toLowerCase() !== 'active') {
-    return null;
-  }
-
-  const handle = csvValue(record['Handle']);
-  const title = csvValue(record['Title']);
-  const vendor = csvValue(record['Vendor']);
-  const category =
-    ['Product Category', 'Product Type', 'Type', 'Category']
-      .map((key) => csvValue(record[key]))
-      .find(Boolean) ?? '';
-  const imageInfo = extractImageInfo(csvValue(record['Image Src']));
-  const image = resolveImagePath(collection, imageInfo, imageIndex);
-
-  const idBase = handle || title || `shopify-${index}`;
+  const image = local || remote || PLACEHOLDER_IMAGE;
 
   return {
-    id: `shopify-${collection}-${idBase}-${index}`,
-    title: title || handle,
-    brand: vendor || 'Unknown',
-    category,
-    image,
-    source: 'shopify',
-    collection,
-  };
-};
-
-const normalizeWooCommerceRecord = (
-  record: Record<string, string>,
-  index: number,
-  collection: ProductCollection,
-  imageIndex: ImageIndex | null,
-): NormalizedProduct => {
-  const title = csvValue(record['Name']);
-  const categoryRaw = csvValue(record['Categories']);
-  const category =
-    categoryRaw
-      .split(',')
-      .map((value) => value.trim())
-      .find(Boolean) ?? '';
-  const brand = csvValue(record['Brand']) || 'Unknown';
-  const imageInfo = extractImageInfo(csvValue(record['Images']));
-  const image = resolveImagePath(collection, imageInfo, imageIndex);
-
-  const idBase = title || `woocommerce-${index}`;
-
-  return {
-    id: `woocommerce-${collection}-${idBase}-${index}`,
+    id,
     title,
     brand,
     category,
     image,
-    source: 'woocommerce',
-    collection,
+    source: 'warehouse',
+    collection: 'local',
   };
-};
-
-const checkImageExists = async (imageUrl: string) => {
-  if (!imageUrl || imageUrl === PLACEHOLDER_IMAGE) {
-    return false;
-  }
-
-  if (typeof window === 'undefined') {
-    try {
-      const { access } = await import('node:fs/promises');
-      const { join } = await import('node:path');
-      const localPath = imageUrl.startsWith('/')
-        ? join(process.cwd(), 'public', imageUrl)
-        : imageUrl;
-      await access(localPath);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  return new Promise<boolean>((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-    img.src = imageUrl;
-  });
-};
-
-const resolveImageFallbacks = async (products: NormalizedProduct[]) => {
-  const cache = new Map<string, Promise<boolean>>();
-
-  const hasImage = (url: string) => {
-    if (!cache.has(url)) {
-      cache.set(url, checkImageExists(url));
-    }
-    return cache.get(url)!;
-  };
-
-  const resolved = await Promise.all(
-    products.map(async (product) => {
-      const imageOk = await hasImage(product.image);
-      return {
-        ...product,
-        image: imageOk ? product.image : PLACEHOLDER_IMAGE,
-      };
-    }),
-  );
-
-  return resolved;
-};
-
-const loadCsv = async (url: string, raw?: string) => {
-  if (raw) {
-    return raw;
-  }
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Unable to load CSV from ${url}`);
-  }
-  return response.text();
 };
 
 export interface LoadProductsOptions {
@@ -372,38 +84,30 @@ export interface LoadProductsOptions {
   sources?: ProductSource[];
 }
 
-export const loadProducts = async ({
-  collections = ['egypt', 'local'],
-  sources = ['shopify', 'woocommerce'],
-}: LoadProductsOptions = {}): Promise<NormalizedProduct[]> => {
-  const imageIndex = await fetchImageIndex();
-  const desiredSources = SOURCE_CONFIG.filter((config) => sources.includes(config.source));
+export const loadProducts = async (
+  _opts: LoadProductsOptions = {},
+): Promise<NormalizedProduct[]> => {
+  try {
+    imageIndexStatus = 'loaded'; // عندنا صور محلية مباشرة، مفيش index
 
-  const csvPayloads = await Promise.all(
-    desiredSources.map(async (config) => ({
-      source: config.source,
-      csvText: await loadCsv(config.url, config.raw),
-    })),
-  );
+    const res = await fetch(WAREHOUSE_JSONL_URL, { cache: 'no-store' });
+    if (!res.ok) {
+      imageIndexStatus = res.status === 404 ? 'missing' : 'error';
+      throw new Error(`Unable to load JSONL from ${WAREHOUSE_JSONL_URL} (${res.status})`);
+    }
 
-  const products = csvPayloads.flatMap(({ source, csvText }) => {
-    const records = csvToRecords(csvText);
-    return collections.flatMap((collection) =>
-      records
-        .map((record, index) => {
-          if (source === 'shopify') {
-            return normalizeShopifyRecord(record, index, collection, imageIndex);
-          }
-          return normalizeWooCommerceRecord(record, index, collection, imageIndex);
-        })
-        .filter((item): item is NormalizedProduct => Boolean(item)),
-    );
-  });
+    const text = await res.text();
+    const rows = parseJsonl(text);
 
-  return resolveImageFallbacks(products);
+    const products = rows.map(toNormalized).filter(Boolean) as NormalizedProduct[];
+    return products;
+  } catch (e) {
+    imageIndexStatus = 'error';
+    throw e;
+  }
 };
 
 export const listCategories = (products: NormalizedProduct[]) =>
-  Array.from(new Set(products.map((product) => product.category).filter(Boolean))).sort((a, b) =>
+  Array.from(new Set(products.map((p) => p.category).filter(Boolean))).sort((a, b) =>
     a.localeCompare(b),
   );
