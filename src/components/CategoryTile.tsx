@@ -39,9 +39,12 @@ export function CategoryTile({ category, productCount }: CategoryTileProps) {
   return (
     <Link to={`/products?category=${category.slug || category.id}`}>
       <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.35 }}
         whileHover={{ y: -6, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 22 }}
       >
         <Card
           className={cn(

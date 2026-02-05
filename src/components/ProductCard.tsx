@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Snowflake, Drumstick, Wheat, ShoppingCart, Milk } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -52,104 +53,111 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link to={`/product/${product.slug}`}>
-      <Card className="group overflow-hidden card-hover h-full">
-        {/* Category Stripe */}
-        <div className={cn('h-1.5 category-stripe', categoryClass)} />
-        
-        <div className="relative aspect-square bg-muted overflow-hidden">
-          <img 
-            src={imageSrc} 
-            alt={name}
-            onError={(event) => {
-              event.currentTarget.src = '/assets/products/placeholder.png';
-            }}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <Card className="group overflow-hidden card-hover h-full">
+          {/* Category Stripe */}
+          <div className={cn('h-1.5 category-stripe', categoryClass)} />
           
-          {/* Badges */}
-          <div className="absolute top-2 start-2 flex flex-col gap-1">
-            {(product.badges ?? []).map((badge) => (
-              <Badge 
-                key={badge} 
-                variant={badge === 'offer' ? 'destructive' : 'secondary'}
-                className="text-xs"
-              >
-                {badgeLabels[badge]}
-              </Badge>
-            ))}
-            {product.isFrozen && (
-              <Badge variant="outline" className={cn('badge-category category-frozen category-border text-xs')}>
-                <Snowflake className="h-3 w-3 me-1" />
-                {t('badge.frozen')}
-              </Badge>
+          <div className="relative aspect-square bg-muted overflow-hidden">
+            <img 
+              src={imageSrc} 
+              alt={name}
+              onError={(event) => {
+                event.currentTarget.src = '/assets/products/placeholder.png';
+              }}
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            
+            {/* Badges */}
+            <div className="absolute top-2 start-2 flex flex-col gap-1">
+              {(product.badges ?? []).map((badge) => (
+                <Badge 
+                  key={badge} 
+                  variant={badge === 'offer' ? 'destructive' : 'secondary'}
+                  className="text-xs"
+                >
+                  {badgeLabels[badge]}
+                </Badge>
+              ))}
+              {product.isFrozen && (
+                <Badge variant="outline" className={cn('badge-category category-frozen category-border text-xs')}>
+                  <Snowflake className="h-3 w-3 me-1" />
+                  {t('badge.frozen')}
+                </Badge>
+              )}
+            </div>
+
+            {/* Out of stock overlay */}
+            {isOutOfStock && (
+              <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                <span className="text-destructive font-semibold">{t('product.outOfStock')}</span>
+              </div>
             )}
           </div>
 
-          {/* Out of stock overlay */}
-          {isOutOfStock && (
-            <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-              <span className="text-destructive font-semibold">{t('product.outOfStock')}</span>
+          <CardContent className="p-4 space-y-3">
+            {/* Category label */}
+            <div className={cn('flex items-center gap-1.5 text-xs text-muted-foreground', categoryClass)}>
+              {category && React.createElement(categoryIcons[category.colorToken] ?? Wheat, {
+                className: cn('h-3.5 w-3.5 category-text', categoryClass)
+              })}
+              <span>{(isArabic ? category?.name_ar : category?.name_en) || category?.name_en || category?.name_ar}</span>
             </div>
-          )}
-        </div>
 
-        <CardContent className="p-4 space-y-3">
-          {/* Category label */}
-          <div className={cn('flex items-center gap-1.5 text-xs text-muted-foreground', categoryClass)}>
-            {category && React.createElement(categoryIcons[category.colorToken] ?? Wheat, {
-              className: cn('h-3.5 w-3.5 category-text', categoryClass)
-            })}
-            <span>{(isArabic ? category?.name_ar : category?.name_en) || category?.name_en || category?.name_ar}</span>
-          </div>
+            {/* Product name */}
+            <h3 className="font-semibold text-foreground line-clamp-2 min-h-[2.5rem]">
+              {name}
+            </h3>
 
-          {/* Product name */}
-          <h3 className="font-semibold text-foreground line-clamp-2 min-h-[2.5rem]">
-            {name}
-          </h3>
+            {company && (
+              <p className="text-xs text-muted-foreground">
+                {(isArabic ? company.name_ar : company.name_en) || company.name_en || company.name_ar}
+              </p>
+            )}
 
-          {company && (
-            <p className="text-xs text-muted-foreground">
-              {(isArabic ? company.name_ar : company.name_en) || company.name_en || company.name_ar}
-            </p>
-          )}
+            {/* Weight */}
+            {weightLabel && <p className="text-sm text-muted-foreground">{weightLabel}</p>}
 
-          {/* Weight */}
-          {weightLabel && <p className="text-sm text-muted-foreground">{weightLabel}</p>}
-
-          {/* Price row */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-bold text-primary price-value">
-                {product.price}
-              </span>
-              <span className="text-xs text-muted-foreground">{t('common.currency')}</span>
-              {product.compareAtPrice && (
-                <span className="text-sm text-muted-foreground line-through">
-                  {product.compareAtPrice}
+            {/* Price row */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-bold text-primary price-value">
+                  {product.price}
                 </span>
-              )}
+                <span className="text-xs text-muted-foreground">{t('common.currency')}</span>
+                {product.compareAtPrice && (
+                  <span className="text-sm text-muted-foreground line-through">
+                    {product.compareAtPrice}
+                  </span>
+                )}
+              </div>
+              
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-9 w-9 shrink-0"
+                disabled={isOutOfStock}
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="h-4 w-4" />
+              </Button>
             </div>
-            
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-9 w-9 shrink-0"
-              disabled={isOutOfStock}
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="h-4 w-4" />
-            </Button>
-          </div>
 
-          {/* Low stock warning */}
-          {isLowStock && (
-            <p className="text-xs text-destructive">
-              {isArabic ? `متبقي ${product.stockQty} فقط` : `Only ${product.stockQty} left`}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {/* Low stock warning */}
+            {isLowStock && (
+              <p className="text-xs text-destructive">
+                {isArabic ? `متبقي ${product.stockQty} فقط` : `Only ${product.stockQty} left`}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
     </Link>
   );
 }

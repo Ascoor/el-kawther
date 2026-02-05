@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,8 @@ export default function ProductsPage() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [frozenOnly, setFrozenOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'newest');
+  const listTopRef = useRef<HTMLDivElement | null>(null);
+  const hasMountedRef = useRef(false);
 
   const resolveCategoryId = useCallback(
     (value: string | null) => {
@@ -52,6 +54,14 @@ export default function ProductsPage() {
       setSelectedCategory(resolvedCategory);
     }
   }, [resolveCategoryId, searchParams, selectedCategory]);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [selectedCategory, selectedCompany]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -271,6 +281,7 @@ export default function ProductsPage() {
 
           {/* Products Grid */}
           <div className="flex-1">
+            <div ref={listTopRef} className="scroll-mt-24" />
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredProducts.map(product => (
