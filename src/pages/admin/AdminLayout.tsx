@@ -1,8 +1,19 @@
 import React from 'react';
 import { Link, useLocation, Navigate, Outlet } from 'react-router-dom';
-import { 
-  LayoutDashboard, Package, ShoppingCart, Ticket, 
-  ChevronLeft, ChevronRight, Menu, X, LogOut, Home, Boxes
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Ticket,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  LogOut,
+  Home,
+  Boxes,
+  Moon,
+  Sun,
+  Globe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -42,6 +53,73 @@ function NavLink({ item, isActive, collapsed }: {
       <Icon className="h-5 w-5 shrink-0" />
       {!collapsed && <span>{t(`admin.${item.key}`)}</span>}
     </Link>
+  );
+}
+
+function AdminHeader() {
+  const { t, language, setLanguage, isArabic } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
+  const location = useLocation();
+  const navLinks = navItems.map(item => ({
+    ...item,
+    label: t(`admin.${item.key}`),
+    active: location.pathname === item.path,
+  }));
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'ar' ? 'en' : 'ar');
+  };
+
+  return (
+    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center gap-4 px-4 lg:px-6">
+        <div className="flex items-center gap-3">
+          <div className="lg:hidden">
+            <MobileSidebar />
+          </div>
+          <h1 className="text-base font-semibold lg:text-lg">{t('admin.dashboard')}</h1>
+        </div>
+
+        <nav className="hidden flex-1 items-center justify-center gap-2 lg:flex">
+          {navLinks.map(link => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={cn(
+                  'flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+                  link.active
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className={cn('ml-auto flex items-center gap-2', isArabic && 'lg:mr-auto lg:ml-0')}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLanguage}
+            className="relative"
+            title={language === 'ar' ? 'English' : 'العربية'}
+          >
+            <Globe className="h-5 w-5" />
+            <span className="absolute -bottom-1 text-[10px] font-bold">
+              {language === 'ar' ? 'EN' : 'ع'}
+            </span>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+        </div>
+      </div>
+    </header>
   );
 }
 
@@ -177,7 +255,6 @@ function MobileSidebar() {
 }
 
 export default function AdminLayout() {
-  const { t, isArabic } = useLanguage();
   const { user, isAdmin } = useStore();
   const [collapsed, setCollapsed] = React.useState(false);
 
@@ -195,11 +272,7 @@ export default function AdminLayout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Mobile Header */}
-        <header className="lg:hidden h-14 border-b bg-card flex items-center px-4 gap-4">
-          <MobileSidebar />
-          <h1 className="font-semibold">{t('admin.dashboard')}</h1>
-        </header>
+        <AdminHeader />
 
         {/* Page Content */}
         <main className="flex-1 p-4 lg:p-6 bg-muted/30">
