@@ -24,20 +24,36 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("node_modules")) {
-            // keep React ecosystem together
-            if (id.includes("react") || id.includes("react-dom"))
-              return "react-vendor";
-
-            // radix/shadcn dependencies
+          manualChunks(id) {
+            if (!id.includes("node_modules")) return;
+          
+            // core react
+            if (id.includes("react") || id.includes("react-dom")) return "react-vendor";
+          
+            // radix/shadcn UI
             if (id.includes("@radix-ui")) return "radix-vendor";
-
+          
+            // router (if you use it)
+            if (id.includes("react-router") || id.includes("@remix-run/router"))
+              return "router";
+          
+            // data fetching (if you use it)
+            if (id.includes("@tanstack/react-query")) return "react-query";
+          
+            // forms/validation (if you use them)
+            if (id.includes("react-hook-form") || id.includes("zod")) return "forms";
+          
+            // charts/editors (common heavy deps)
+            if (id.includes("recharts") || id.includes("d3")) return "charts";
+            if (id.includes("quill") || id.includes("slate") || id.includes("tiptap"))
+              return "editor";
+          
             // icons
             if (id.includes("lucide-react")) return "icons";
-
-            // everything else from node_modules
+          
             return "vendor";
           }
+          
         },
       },
     },
