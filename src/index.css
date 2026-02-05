@@ -11,45 +11,69 @@
 @layer base {
   :root {
     /* ======================
-       BRAND COLOR SCALES
+       BRAND COLOR SCALES (Luxury Burgundy + Champagne Gold)
        ====================== */
-    --burgundy-50: 342 60% 96%;
-    --burgundy-100: 342 60% 91%;
-    --burgundy-300: 342 60% 56%;
-    --burgundy-500: 342 60% 38%;
-    --burgundy-700: 342 60% 30%;
-    --burgundy-900: 342 60% 20%;
+    --burgundy-50: 344 45% 96%;
+    --burgundy-100: 344 40% 92%;
+    --burgundy-200: 344 38% 86%;
+    --burgundy-300: 343 40% 72%;
+    --burgundy-400: 343 45% 58%;
+    --burgundy-500: 343 50% 44%;
+    --burgundy-600: 343 55% 36%;
+    --burgundy-700: 343 58% 28%;
+    --burgundy-800: 343 60% 22%;
+    --burgundy-900: 343 62% 16%;
 
-    --gold-100: 38 70% 92%;
-    --gold-300: 38 60% 76%;
-    --gold-500: 38 55% 60%;
-    --gold-700: 38 50% 48%;
+    --gold-50: 42 45% 96%;
+    --gold-100: 42 45% 92%;
+    --gold-200: 41 42% 86%;
+    --gold-300: 40 40% 76%;
+    --gold-400: 40 38% 66%;
+    --gold-500: 39 36% 58%;
+    --gold-600: 38 34% 48%;
+    --gold-700: 37 32% 40%;
+    --gold-800: 36 30% 32%;
 
     --brand-burgundy: var(--burgundy-700);
     --brand-gold: var(--gold-500);
 
     /* ======================
-       CATEGORY COLORS
+       NEUTRALS (Ivory/Sand/Ink)
        ====================== */
-    --category-frozen: 196 64% 46%;
-    --category-frozen-soft: 196 55% 94%;
-    --category-frozen-foreground: 196 55% 28%;
-    --category-frozen-border: 196 48% 78%;
+    --neutral-50: 36 33% 97%;
+    --neutral-100: 34 28% 94%;
+    --neutral-200: 32 22% 89%;
+    --neutral-300: 30 16% 82%;
+    --neutral-400: 28 12% 70%;
+    --neutral-500: 26 10% 55%;
+    --neutral-600: 24 12% 42%;
+    --neutral-700: 22 14% 28%;
+    --neutral-800: 20 16% 18%;
+    --neutral-900: 20 18% 12%;
+    --neutral-950: 20 20% 6%;
 
-    --category-meat: 8 62% 45%;
-    --category-meat-soft: 8 55% 94%;
-    --category-meat-foreground: 8 50% 28%;
-    --category-meat-border: 8 52% 78%;
+    /* ======================
+       CATEGORY COLORS (Soft Premium)
+       ====================== */
+    --category-frozen: 196 48% 44%;
+    --category-frozen-soft: 196 45% 94%;
+    --category-frozen-foreground: 196 32% 26%;
+    --category-frozen-border: 196 30% 80%;
 
-    --category-grocery: 345 62% 38%;
-    --category-grocery-soft: 345 55% 94%;
-    --category-grocery-foreground: 345 50% 28%;
-    --category-grocery-border: 345 52% 78%;
+    --category-meat: 8 52% 42%;
+    --category-meat-soft: 8 40% 94%;
+    --category-meat-foreground: 8 32% 26%;
+    --category-meat-border: 8 30% 80%;
 
-    --category-dairy: 210 55% 52%;
-    --category-dairy-soft: 210 50% 94%;
-    --category-dairy-foreground: 210 45% 30%;
-    --category-dairy-border: 210 50% 80%;
+    --category-grocery: 345 50% 38%;
+    --category-grocery-soft: 345 36% 94%;
+    --category-grocery-foreground: 345 30% 26%;
+    --category-grocery-border: 345 28% 80%;
+
+    --category-dairy: 210 46% 48%;
+    --category-dairy-soft: 210 40% 94%;
+    --category-dairy-foreground: 210 30% 26%;
+    --category-dairy-border: 210 30% 82%;
 
     --frozen: var(--category-frozen);
     --meat: var(--category-meat);
@@ -59,73 +83,122 @@
     /* ======================
        SEMANTIC TOKENS
        ====================== */
-    --background: 36 25% 98%;
-    --foreground: 20 16% 12%;
+    --background: var(--neutral-50);
+    --foreground: var(--neutral-900);
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: var(--neutral-900);
 
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--neutral-900);
+
+    /* Use primary for brand anchors (CTA, price). Use accent for highlights (badges, chips). */
     --primary: var(--burgundy-700);
-    --primary-soft: var(--burgundy-300);
-    --primary-foreground: 38 30% 97%;
+    --primary-soft: var(--burgundy-200);
+    --primary-foreground: 40 30% 98%;
 
     --accent: var(--gold-500);
-    --accent-soft: var(--gold-300);
-    --accent-foreground: 22 20% 12%;
+    --accent-soft: var(--gold-200);
+    --accent-foreground: var(--neutral-900);
 
-    --muted: 34 18% 93%;
-    --muted-foreground: 24 10% 40%;
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-600);
 
-    --border: 32 16% 86%;
+    --border: var(--neutral-200);
     --ring: var(--burgundy-500);
 
-    --radius: 0.75rem;
+    --destructive: 6 70% 48%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 152 45% 38%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 80% 50%;
+    --warning-foreground: 22 40% 12%;
+    --info: 210 60% 46%;
+    --info-foreground: 0 0% 98%;
+
+    /* Surfaces: use surface-1 for page sections, surface-2 for cards, surface-3 for nested/raised blocks. */
+    --surface-1: 0 0% 100%;
+    --surface-2: var(--neutral-100);
+    --surface-3: var(--neutral-200);
+
+    --glass-bg: 0 0% 100%;
+    --glass-border: var(--neutral-200);
+    --glass-blur: 18px;
+
+    --shadow-1: 0 12px 24px -16px hsla(var(--neutral-900), 0.24);
+    --shadow-2: 0 20px 40px -22px hsla(var(--neutral-900), 0.26);
+    --shadow-3: 0 28px 60px -24px hsla(var(--neutral-900), 0.28);
+
+    --radius: 0.8rem;
   }
 
   /* ======================
      DARK MODE
      ====================== */
   .dark {
-    --background: 20 20% 8%;
-    --foreground: 38 30% 96%;
+    --background: 20 18% 8%;
+    --foreground: 36 28% 92%;
 
-    --card: 18 16% 12%;
-    --card-foreground: 38 30% 96%;
+    --card: 20 18% 12%;
+    --card-foreground: 36 28% 92%;
+
+    --popover: 20 18% 12%;
+    --popover-foreground: 36 28% 92%;
 
     --primary: var(--burgundy-500);
-    --primary-soft: var(--burgundy-300);
+    --primary-soft: var(--burgundy-700);
 
-    --accent: var(--gold-700);
-    --accent-soft: var(--gold-300);
+    --accent: var(--gold-600);
+    --accent-soft: var(--gold-700);
 
-    --muted: 24 18% 18%;
-    --muted-foreground: 34 12% 70%;
+    --muted: 24 12% 18%;
+    --muted-foreground: 30 12% 70%;
 
     --border: 24 12% 26%;
-    --ring: var(--burgundy-500);
+    --ring: var(--gold-600);
+
+    --destructive: 6 66% 54%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 152 40% 44%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 70% 56%;
+    --warning-foreground: 22 40% 12%;
+    --info: 210 55% 56%;
+    --info-foreground: 0 0% 98%;
+
+    --surface-1: 20 18% 12%;
+    --surface-2: 20 16% 16%;
+    --surface-3: 20 14% 20%;
+
+    --glass-bg: 20 18% 12%;
+    --glass-border: 24 12% 30%;
+
+    --shadow-1: 0 18px 30px -18px hsla(var(--neutral-950), 0.5);
+    --shadow-2: 0 26px 46px -24px hsla(var(--neutral-950), 0.55);
+    --shadow-3: 0 34px 70px -28px hsla(var(--neutral-950), 0.6);
 
     --brand-burgundy: var(--burgundy-500);
-    --brand-gold: var(--gold-700);
+    --brand-gold: var(--gold-600);
 
-    --category-frozen: 196 60% 62%;
-    --category-frozen-soft: 196 38% 20%;
-    --category-frozen-foreground: 196 70% 82%;
-    --category-frozen-border: 196 40% 32%;
+    --category-frozen: 196 46% 58%;
+    --category-frozen-soft: 196 30% 18%;
+    --category-frozen-foreground: 196 48% 82%;
+    --category-frozen-border: 196 26% 30%;
 
-    --category-meat: 8 65% 60%;
-    --category-meat-soft: 8 38% 20%;
-    --category-meat-foreground: 8 70% 82%;
-    --category-meat-border: 8 40% 32%;
+    --category-meat: 8 54% 56%;
+    --category-meat-soft: 8 30% 18%;
+    --category-meat-foreground: 8 48% 82%;
+    --category-meat-border: 8 26% 30%;
 
-    --category-grocery: 345 65% 60%;
-    --category-grocery-soft: 345 35% 20%;
-    --category-grocery-foreground: 345 70% 84%;
-    --category-grocery-border: 345 38% 32%;
+    --category-grocery: 345 50% 56%;
+    --category-grocery-soft: 345 28% 18%;
+    --category-grocery-foreground: 345 48% 84%;
+    --category-grocery-border: 345 24% 30%;
 
-    --category-dairy: 210 60% 64%;
-    --category-dairy-soft: 210 35% 20%;
-    --category-dairy-foreground: 210 70% 84%;
-    --category-dairy-border: 210 38% 32%;
+    --category-dairy: 210 50% 60%;
+    --category-dairy-soft: 210 28% 18%;
+    --category-dairy-foreground: 210 48% 84%;
+    --category-dairy-border: 210 24% 32%;
 
     --frozen: var(--category-frozen);
     --meat: var(--category-meat);
@@ -176,7 +249,7 @@
     height: 18rem;
     border-radius: 1.75rem;
     overflow: hidden;
-    box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.65);
+    box-shadow: var(--shadow-3);
   }
 
   @media (min-width: 1024px) {
@@ -186,19 +259,19 @@
   .hero-gradient {
     background:
       radial-gradient(
-        120% 120% at 15% 15%,
-        hsla(var(--accent), 0.35),
-        transparent 60%
+        120% 120% at 12% 18%,
+        hsla(var(--accent), 0.28),
+        transparent 62%
       ),
       radial-gradient(
-        140% 140% at 85% 25%,
-        hsla(var(--primary), 0.45),
-        transparent 55%
+        140% 140% at 85% 22%,
+        hsla(var(--primary), 0.42),
+        transparent 58%
       ),
       linear-gradient(
         135deg,
         hsl(var(--burgundy-900)) 0%,
-        hsl(var(--burgundy-700)) 40%,
+        hsl(var(--burgundy-700)) 45%,
         hsl(var(--accent)) 100%
       );
   }
@@ -208,7 +281,8 @@
     position: absolute;
     inset: 0;
     background-image: url("/src/assets/noise.png");
-    opacity: 0.04;
+    background-size: 160px 160px;
+    opacity: 0.045;
     mix-blend-mode: overlay;
     pointer-events: none;
   }
@@ -223,11 +297,11 @@
   .badge-category {
     background: linear-gradient(
       135deg,
-      hsla(var(--category-soft), 0.5),
-      hsla(var(--category-soft), 0.18)
+      hsla(var(--category-soft), 0.6),
+      hsla(var(--category-soft), 0.2)
     );
     color: hsl(var(--category-foreground));
-    border-color: hsla(var(--category-border), 0.6);
+    border-color: hsla(var(--category-border), 0.65);
   }
 
   .category-frozen {
@@ -273,8 +347,8 @@
   .category-surface {
     background: linear-gradient(
       135deg,
-      hsla(var(--category-soft), 0.5),
-      hsla(var(--category-soft), 0.14) 55%,
+      hsla(var(--category-soft), 0.55),
+      hsla(var(--category-soft), 0.18) 55%,
       transparent
     );
   }
@@ -282,33 +356,38 @@
   .category-surface-hover:hover {
     background: linear-gradient(
       135deg,
-      hsla(var(--category-soft), 0.7),
-      hsla(var(--category-soft), 0.2) 55%,
+      hsla(var(--category-soft), 0.72),
+      hsla(var(--category-soft), 0.24) 55%,
       transparent
     );
   }
 
   .category-border {
-    border-color: hsla(var(--category-border), 0.6);
+    border-color: hsla(var(--category-border), 0.65);
   }
 
   .category-border-hover:hover {
-    border-color: hsla(var(--category-border), 0.9);
+    border-color: hsla(var(--category-border), 0.95);
   }
 
   .category-icon-bg {
-    background-color: hsla(var(--category-soft), 0.5);
+    background-color: hsla(var(--category-soft), 0.55);
   }
 
   .category-soft-header {
-    background-color: hsla(var(--category-soft), 0.4);
+    background-color: hsla(var(--category-soft), 0.45);
   }
 
   /* ======================
      CARDS
      ====================== */
   .card-hover {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+    @apply transition-all duration-300 hover:-translate-y-1;
+    box-shadow: var(--shadow-1);
+  }
+
+  .card-hover:hover {
+    box-shadow: var(--shadow-2);
   }
 }
 
@@ -318,6 +397,25 @@
 
 @layer utilities {
   .text-balance { text-wrap: balance; }
+
+  .surface-1 { background-color: hsl(var(--surface-1)); }
+  .surface-2 { background-color: hsl(var(--surface-2)); }
+  .surface-3 { background-color: hsl(var(--surface-3)); }
+
+  .elevation-1 { box-shadow: var(--shadow-1); }
+  .elevation-2 { box-shadow: var(--shadow-2); }
+  .elevation-3 { box-shadow: var(--shadow-3); }
+
+  .glass-panel {
+    background-color: hsla(var(--glass-bg), 0.68);
+    border: 1px solid hsla(var(--glass-border), 0.5);
+    backdrop-filter: blur(var(--glass-blur));
+  }
+
+  .text-premium {
+    letter-spacing: 0.02em;
+    font-weight: 600;
+  }
 
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out both;
