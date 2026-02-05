@@ -3,17 +3,20 @@ import { Link } from 'react-router-dom';
 import { Phone, MessageCircle, Mail, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useStore } from '@/contexts/StoreContext';
 import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
 
 export function Footer() {
   const { t, isArabic } = useLanguage();
   const { isDark } = useTheme();
+  const { companies } = useStore();
+  const featuredBrands = companies.slice(0, 4);
 
   return (
     <footer className="bg-card border-t">
       <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="space-y-4">
             <img 
@@ -26,13 +29,15 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Categories */}
           <div>
             <h4 className="font-semibold mb-4">{t('nav.categories')}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/products?category=frozen" className="hover:text-primary">{t('cat.frozen')}</Link></li>
               <li><Link to="/products?category=meat" className="hover:text-primary">{t('cat.meat')}</Link></li>
               <li><Link to="/products?category=grocery" className="hover:text-primary">{t('cat.grocery')}</Link></li>
+              <li><Link to="/products?category=dairy" className="hover:text-primary">{t('cat.dairy')}</Link></li>
+              <li><Link to="/products?category=all" className="hover:text-primary">{t('cat.all')}</Link></li>
             </ul>
           </div>
 
@@ -43,6 +48,26 @@ export function Footer() {
               <li><Link to="/shipping-policy" className="hover:text-primary">{t('footer.shipping')}</Link></li>
               <li><Link to="/returns-policy" className="hover:text-primary">{t('footer.returns')}</Link></li>
               <li><Link to="/about" className="hover:text-primary">{t('nav.about')}</Link></li>
+            </ul>
+          </div>
+
+          {/* Brands */}
+          <div>
+            <h4 className="font-semibold mb-4">{t('footer.brands')}</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {featuredBrands.length > 0 ? (
+                featuredBrands.map((brand) => (
+                  <li key={brand.id}>
+                    <Link to={`/products?company=${brand.id}`} className="hover:text-primary">
+                      {isArabic ? brand.name_ar : brand.name_en}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li>
+                  <Link to="/companies" className="hover:text-primary">{t('brand.name')}</Link>
+                </li>
+              )}
             </ul>
           </div>
 

@@ -37,6 +37,7 @@ const translations: Record<Language, Record<string, string>> = {
     'cat.frozen': 'مجمّدات',
     'cat.meat': 'لحوم',
     'cat.grocery': 'بقالة',
+    'cat.dairy': 'ألبان',
     'cat.all': 'جميع المنتجات',
     
     // Home
@@ -177,6 +178,7 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.shipping': 'سياسة الشحن',
     'footer.returns': 'سياسة الإرجاع',
     'footer.privacy': 'سياسة الخصوصية',
+    'footer.brands': 'العلامات التجارية',
     
     // Contact
     'contact.title': 'اتصل بنا',
@@ -210,6 +212,7 @@ const translations: Record<Language, Record<string, string>> = {
     'cat.frozen': 'Frozen',
     'cat.meat': 'Meat',
     'cat.grocery': 'Grocery',
+    'cat.dairy': 'Dairy',
     'cat.all': 'All Products',
     
     // Home
@@ -346,6 +349,7 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.shipping': 'Shipping Policy',
     'footer.returns': 'Returns Policy',
     'footer.privacy': 'Privacy Policy',
+    'footer.brands': 'Brands',
     
     // Contact
     'contact.title': 'Contact Us',
