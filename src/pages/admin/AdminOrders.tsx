@@ -14,6 +14,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -185,6 +186,11 @@ export default function AdminOrders() {
                 {t(`order.status.${selectedOrder?.status}`)}
               </Badge>
             </DialogTitle>
+            <DialogDescription>
+              {isArabic
+                ? 'راجع بيانات الطلب وحدّث الحالة عند الحاجة.'
+                : 'Review order details and update the status when needed.'}
+            </DialogDescription>
           </DialogHeader>
 
           {selectedOrder && (

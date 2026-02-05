@@ -15,6 +15,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -211,6 +212,11 @@ export default function AdminCoupons() {
                 ? (isArabic ? 'إضافة كوبون جديد' : 'Add New Coupon')
                 : (isArabic ? 'تعديل الكوبون' : 'Edit Coupon')}
             </DialogTitle>
+            <DialogDescription>
+              {isArabic
+                ? 'اضبط إعدادات الكوبون ثم احفظ.'
+                : 'Adjust coupon settings and save.'}
+            </DialogDescription>
           </DialogHeader>
 
           {editingCoupon && (

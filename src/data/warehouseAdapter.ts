@@ -1,8 +1,11 @@
 // src/data/warehouseAdapter.ts
 import type { Category, Company, Product, WeightOption } from '@/types';
 
-// JSONL file lives in public/assets/images/warehouse_products.jsonl
-const JSONL_URL = '/assets/images/warehouse_products.json';
+// JSONL file lives in public/assets/images/warehouse_products.json
+const JSONL_URLS = [
+  '/assets/images/warehouse_products.json',
+  '/assets/images/warehouse_products.jsonl',
+];
 const PLACEHOLDER_IMAGE = '/assets/products/placeholder.png';
 
 export type WarehouseSection = {
@@ -125,11 +128,32 @@ let loaded = false;
 let loadPromise: Promise<void> | null = null;
 
 async function fetchJsonl(): Promise<RawRow[]> {
-  const res = await fetch(JSONL_URL, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`Failed to load ${JSONL_URL}: ${res.status}`);
+  let response: Response | null = null;
 
-  const text = await res.text();
-  const lines = text
+  for (const url of JSONL_URLS) {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      response = res;
+      break;
+    }
+  }
+
+  if (!response) {
+    throw new Error(`Failed to load warehouse data from ${JSONL_URLS.join(', ')}`);
+  }
+
+  const text = await response.text();
+  const trimmed = text.trim();
+
+  if (trimmed.startsWith('[')) {
+    try {
+      return JSON.parse(trimmed) as RawRow[];
+    } catch (error) {
+      throw new Error(`Failed to parse warehouse JSON: ${(error as Error).message}`);
+    }
+  }
+
+  const lines = trimmed
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
