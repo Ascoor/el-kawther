@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import HomePage from "./HomePage";
-import { SplashScreen } from "@/components/SplashScreen";
+import { BrandSplashLoader } from "@/components/loaders/BrandSplashLoader";
 
 export default function HomeWithSplash() {
   const [done, setDone] = useState(false);
 
   return (
     <>
-      {!done && <SplashScreen onDone={() => setDone(true)} skipIfSeen />}
+      {!done && <BrandSplashLoader auto onDone={() => setDone(true)} />}
       {done && <HomePage />}
     </>
   );
