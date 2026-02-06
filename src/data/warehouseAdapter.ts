@@ -1,11 +1,9 @@
 // src/data/warehouseAdapter.ts
 import type { Category, Company, Product, WeightOption } from '@/types';
+import { loadWarehouseProducts } from '@/lib/warehouse/loadWarehouseProducts';
+import type { Product as WarehouseProduct } from '@/lib/warehouse/loadWarehouseProducts';
+import { brandToId, buildCompaniesIndex, extractBrandFromProduct } from '@/lib/brands/brandExtraction';
 
-// JSONL file lives in public/assets/images/warehouse_products.json
-const JSONL_URLS = [
-  '/assets/images/warehouse_products.json',
-  '/assets/images/warehouse_products.jsonl',
-];
 const PLACEHOLDER_IMAGE = '/assets/products/placeholder.png';
 
 export type WarehouseSection = {
@@ -13,30 +11,6 @@ export type WarehouseSection = {
   slug: string;
   name_ar: string;
   name_en: string;
-};
-
-type RawRow = {
-  product_id?: string | number;
-  name?: string;
-  description?: string;
-  category_name?: string;
-  brand_name?: string | null;
-  price?: number | string | null;
-  sale_price?: number | string | null;
-  regular_price?: number | string | null;
-  currency?: string | null;
-  is_available?: boolean | string | null;
-  is_out_of_stock?: boolean | string | null;
-  is_on_sale?: boolean | string | null;
-  sold_quantity?: number | string | null;
-  tags?: string | null;
-  sku?: string | null;
-  image?: string | null;
-  local_image?: string | null;
-  image_url?: string | null;
-  original_image?: string | null;
-  product_url?: string | null;
-  custom_url?: string | null;
 };
 
 const safeStr = (value: unknown, fallback = '') => {
@@ -104,7 +78,7 @@ const normalizeLocalImage = (value?: string | null) => {
   return filename ? `/assets/images/products/${filename}` : null;
 };
 
-export const resolveProductImage = (row: RawRow) => {
+export const resolveProductImage = (row: WarehouseProduct) => {
   const local =
     normalizeLocalImage(row.local_image) ||
     normalizeLocalImage(row.image) ||
@@ -127,47 +101,6 @@ export const sections: WarehouseSection[] = [];
 let loaded = false;
 let loadPromise: Promise<void> | null = null;
 
-async function fetchJsonl(): Promise<RawRow[]> {
-  let response: Response | null = null;
-
-  for (const url of JSONL_URLS) {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (res.ok) {
-      response = res;
-      break;
-    }
-  }
-
-  if (!response) {
-    throw new Error(`Failed to load warehouse data from ${JSONL_URLS.join(', ')}`);
-  }
-
-  const text = await response.text();
-  const trimmed = text.trim();
-
-  if (trimmed.startsWith('[')) {
-    try {
-      return JSON.parse(trimmed) as RawRow[];
-    } catch (error) {
-      throw new Error(`Failed to parse warehouse JSON: ${(error as Error).message}`);
-    }
-  }
-
-  const lines = trimmed
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  return lines.flatMap((line, index) => {
-    try {
-      return [JSON.parse(line) as RawRow];
-    } catch {
-      console.warn(`Bad JSONL line #${index + 1}`);
-      return [];
-    }
-  });
-}
-
 const toWeightOptions = (): WeightOption[] => [
   {
     label_ar: 'افتراضي',
@@ -177,7 +110,7 @@ const toWeightOptions = (): WeightOption[] => [
   },
 ];
 
-const toBadges = (row: RawRow): Product['badges'] => {
+const toBadges = (row: WarehouseProduct): Product['badges'] => {
   const badges: Product['badges'] = [];
   const tags = safeStr(row.tags).toLowerCase();
   if (safeBool(row.is_on_sale)) badges.push('offer');
@@ -196,10 +129,11 @@ export async function ensureWarehouseLoaded() {
   if (loaded) return;
   if (!loadPromise) {
     loadPromise = (async () => {
-      const rows = await fetchJsonl();
+      const rows = await loadWarehouseProducts();
 
       const catMap = new Map<string, Category>();
-      const brandMap = new Map<string, Company>();
+      const companiesIndex = buildCompaniesIndex(rows);
+      const companyIds = new Set(companiesIndex.map((company) => company.id));
 
       for (const row of rows) {
         const categoryName = safeStr(row.category_name, 'بدون تصنيف');
@@ -218,24 +152,10 @@ export async function ensureWarehouseLoaded() {
           });
         }
 
-        const brandName = safeStr(row.brand_name, 'Unknown');
-        const brandSlug = slugify(brandName) || 'unknown';
-        const brandId = `brand-${brandSlug}`;
-
-        if (!brandMap.has(brandId)) {
-          brandMap.set(brandId, {
-            id: brandId,
-            slug: brandSlug,
-            name_ar: brandName,
-            name_en: brandName,
-            description_ar: '',
-            description_en: '',
-          });
-        }
       }
 
       const builtCategories = Array.from(catMap.values());
-      const builtCompanies = Array.from(brandMap.values());
+      const builtCompanies = companiesIndex;
 
       const builtProducts = rows
         .filter((row) => safeStr(row.product_id))
@@ -246,9 +166,10 @@ export async function ensureWarehouseLoaded() {
           const categoryName = safeStr(row.category_name, 'بدون تصنيف');
           const categorySlug = slugify(categoryName) || 'uncategorized';
           const categoryId = `cat-${categorySlug}`;
-          const brandName = safeStr(row.brand_name, 'Unknown');
-          const brandSlug = slugify(brandName) || 'unknown';
-          const companyId = `brand-${brandSlug}`;
+          const brandExtraction = extractBrandFromProduct(row);
+          const brandName = brandExtraction.brand ?? '';
+          const brandId = brandName ? brandToId(brandName) : '';
+          const companyId = companyIds.has(brandId) ? brandId : '';
 
           const price = safeNum(row.sale_price ?? row.price ?? row.regular_price, 0);
           const regularPrice = safeNum(row.regular_price ?? price, price);

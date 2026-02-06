@@ -115,7 +115,7 @@ export default function ProductDetailPage() {
               <span>{isArabic ? category?.name_ar : category?.name_en}</span>
               {company && (
                 <span className="text-muted-foreground">
-                  · {isArabic ? company.name_ar : company.name_en}
+                  · {company.name}
                 </span>
               )}
             </div>

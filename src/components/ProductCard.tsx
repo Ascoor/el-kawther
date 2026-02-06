@@ -117,7 +117,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
             {company && (
               <p className="text-xs text-muted-foreground">
-                {(isArabic ? company.name_ar : company.name_en) || company.name_en || company.name_ar}
+                {company.name}
               </p>
             )}
 

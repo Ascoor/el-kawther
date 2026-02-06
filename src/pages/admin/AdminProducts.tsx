@@ -51,7 +51,7 @@ const EMPTY_PRODUCT: Partial<Product> = {
   desc_ar: '',
   desc_en: '',
   categoryId: 'frozen',
-  companyId: 'el-kawther',
+  companyId: '',
   price: 0,
   currency: 'EGP',
   images: [],
@@ -118,7 +118,7 @@ export default function AdminProducts() {
   };
 
   const openCreateDialog = () => {
-    setEditingProduct({ ...EMPTY_PRODUCT });
+    setEditingProduct({ ...EMPTY_PRODUCT, companyId: companies[0]?.id || '' });
     setIsCreating(true);
   };
 
@@ -362,7 +362,7 @@ export default function AdminProducts() {
                 <div className="space-y-2">
                   <Label>{t('filter.company')}</Label>
                   <Select
-                    value={editingProduct.companyId || 'el-kawther'}
+                    value={editingProduct.companyId || companies[0]?.id || ''}
                     onValueChange={(value) => setEditingProduct({ ...editingProduct, companyId: value })}
                   >
                     <SelectTrigger>
@@ -371,7 +371,7 @@ export default function AdminProducts() {
                     <SelectContent>
                       {companies.map(company => (
                         <SelectItem key={company.id} value={company.id}>
-                          {isArabic ? company.name_ar : company.name_en}
+                          {company.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
