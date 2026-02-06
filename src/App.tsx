@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,8 +8,9 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { StoreProvider } from "@/contexts/StoreContext";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { BrandSplashLoader } from "@/components/loaders/BrandSplashLoader";
 
-import HomeWithSplash from "./pages/HomeWithSplash";
+import HomePage from "./pages/HomePage";
 
 import ProductsPage from "./pages/ProductsPage";
 import ProductsGalleryPage from "./pages/ProductsGalleryPage";
@@ -37,53 +39,59 @@ import AdminInventory from "./pages/admin/AdminInventory";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <LanguageProvider>
-        <StoreProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <ScrollToTop />
-              <Routes>
-// ...
-<Route path="/" element={<HomeWithSplash />} />
+const App = () => {
+  const [appReady, setAppReady] = useState(false);
 
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/products-gallery" element={<ProductsGalleryPage />} />
-                <Route path="/product/:slug" element={<ProductDetailPage />} />
-                <Route path="/categories" element={<CategoriesPage />} />
-                <Route path="/companies" element={<CompaniesPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
-                <Route path="/order/:orderId" element={<OrderDetailPage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
-                <Route path="/returns-policy" element={<ReturnsPolicyPage />} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="inventory" element={<AdminInventory />} />
-                  <Route path="coupons" element={<AdminCoupons />} />
-                </Route>
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </StoreProvider>
-      </LanguageProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <LanguageProvider>
+          <StoreProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrandSplashLoader auto onDone={() => setAppReady(true)} />
+              {appReady && (
+                <BrowserRouter>
+                  <ScrollToTop />
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/products-gallery" element={<ProductsGalleryPage />} />
+                    <Route path="/product/:slug" element={<ProductDetailPage />} />
+                    <Route path="/categories" element={<CategoriesPage />} />
+                    <Route path="/companies" element={<CompaniesPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+                    <Route path="/order/:orderId" element={<OrderDetailPage />} />
+                    <Route path="/orders" element={<OrdersPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                    <Route path="/returns-policy" element={<ReturnsPolicyPage />} />
+
+                    {/* Admin Routes */}
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="orders" element={<AdminOrders />} />
+                      <Route path="products" element={<AdminProducts />} />
+                      <Route path="inventory" element={<AdminInventory />} />
+                      <Route path="coupons" element={<AdminCoupons />} />
+                    </Route>
+
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              )}
+            </TooltipProvider>
+          </StoreProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
