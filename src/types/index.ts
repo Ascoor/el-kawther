@@ -11,11 +11,11 @@ export interface Category {
 
 export interface Company {
   id: string;
-  slug: string;
-  name_ar: string;
-  name_en: string;
-  description_ar: string;
-  description_en: string;
+  name: string;
+  productsCount: number;
+  topCategories: Array<{ name: string; count: number }>;
+  sampleProducts: Array<{ product_id: string; name: string; image_url?: string; price?: number }>;
+  logoHint?: string;
 }
 
 export interface WeightOption {

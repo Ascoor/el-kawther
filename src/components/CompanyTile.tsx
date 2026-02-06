@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Company } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Company } from '@/types';
 
 interface CompanyTileProps {
   company: Company;
@@ -12,15 +12,13 @@ interface CompanyTileProps {
 
 export function CompanyTile({ company, productCount }: CompanyTileProps) {
   const { isArabic, t } = useLanguage();
-  const name = (isArabic ? company.name_ar : company.name_en) || company.name_en || company.name_ar;
-  const description =
-    (isArabic ? company.description_ar : company.description_en) ||
-    company.description_en ||
-    company.description_ar ||
-    '';
+  const name = company.name;
+  const topCategories = company.topCategories.slice(0, 2).map((cat) => cat.name).join(' · ');
+
+  const resolvedCount = productCount ?? company.productsCount;
 
   return (
-    <Link to={`/products?company=${company.id}`}>
+    <Link to={`/companies/${company.id}`}>
       <Card className="group overflow-hidden transition-all duration-300 hover:shadow-md">
         <CardContent className="p-6 flex flex-col gap-3">
           <div className="flex items-center gap-3">
@@ -29,14 +27,16 @@ export function CompanyTile({ company, productCount }: CompanyTileProps) {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground">{name}</h3>
-              {productCount !== undefined && (
+              {resolvedCount !== undefined && (
                 <p className="text-sm text-muted-foreground">
-                  {productCount} {isArabic ? 'منتج' : 'products'}
+                  {resolvedCount} {isArabic ? 'منتج' : 'products'}
                 </p>
               )}
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">{description || t('common.noResults')}</p>
+          <p className="text-sm text-muted-foreground">
+            {topCategories || t('common.noResults')}
+          </p>
         </CardContent>
       </Card>
     </Link>

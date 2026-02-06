@@ -57,8 +57,7 @@ export function ProductsGallery() {
           p.desc_en,
           category?.name_ar,
           category?.name_en,
-          company?.name_ar,
-          company?.name_en,
+          company?.name,
         ]
           .filter(Boolean)
           .some((field) => String(field).toLowerCase().includes(s));
@@ -72,9 +71,7 @@ export function ProductsGallery() {
       const bCompany = companyMap.get(b.companyId);
 
       if (sortBy === 'brand') {
-        return (aCompany?.name_en || aCompany?.name_ar || '').localeCompare(
-          bCompany?.name_en || bCompany?.name_ar || '',
-        );
+        return (aCompany?.name || '').localeCompare(bCompany?.name || '');
       }
 
       if (sortBy === 'category') {
@@ -134,7 +131,7 @@ export function ProductsGallery() {
               <SelectItem value="all">All brands</SelectItem>
               {companies.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {(isArabic ? c.name_ar : c.name_en) || c.name_en || c.name_ar}
+                  c.name
                 </SelectItem>
               ))}
             </SelectContent>
@@ -205,9 +202,7 @@ export function ProductsGallery() {
                       )}
                       {company && (
                         <Badge variant="outline">
-                          {(isArabic ? company.name_ar : company.name_en) ||
-                            company.name_en ||
-                            company.name_ar}
+                          {company.name}
                         </Badge>
                       )}
                     </div>
@@ -215,9 +210,7 @@ export function ProductsGallery() {
                   <CardContent className="space-y-2 p-4">
                     <h3 className="text-lg font-semibold leading-snug">{title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {company
-                        ? `${isArabic ? company.name_ar : company.name_en}`
-                        : '—'}
+                      {company ? `${company.name}` : '—'}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {category
